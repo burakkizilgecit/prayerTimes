@@ -96,7 +96,27 @@
           }
         }
       ],
-      "./plugins/withBuildConfig"
+      "./plugins/withBuildConfig",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "PrayerWidget",
+              "label": "İbadet Saati — Namaz Vakti",
+              "description": "Sıradaki namaz vaktini ana ekranınızda görün",
+              "previewImage": "./assets/images/icon.png",
+              "minWidth": "250dp",
+              "minHeight": "110dp",
+              "minResizeWidth": "180dp",
+              "minResizeHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

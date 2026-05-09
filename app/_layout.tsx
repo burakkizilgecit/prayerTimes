@@ -1,6 +1,8 @@
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
+import { Platform } from 'react-native';
+import { requestWidgetUpdate } from 'react-native-android-widget';
 import * as Notifications from 'expo-notifications';
 import { usePrayerStore } from '../store/usePrayerStore';
 import { useDhikrStore } from '../store/useDhikrStore';
@@ -58,10 +60,13 @@ export default function RootLayout() {
     }
   }, [tutorialLoaded, tutorialDone]);
 
-  // Reschedule notifications when location or settings change
+  // Reschedule notifications + update widget when location or settings change
   useEffect(() => {
     if (!location) return;
     scheduleAllNotifications(location.lat, location.lng, settings).catch(() => {});
+    if (Platform.OS === 'android') {
+      requestWidgetUpdate({ widgetName: 'PrayerWidget', renderWidget: () => undefined as any }).catch(() => {});
+    }
   }, [location?.lat, location?.lng, settings.notifications, settings.silentHours]);
 
   return (

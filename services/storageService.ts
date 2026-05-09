@@ -22,4 +22,5 @@ export const STORAGE_KEYS = {
   SETTINGS: 'app_settings',
   ACHIEVEMENTS: 'achievements',
   STATISTICS: 'statistics',
+  LOCATION: 'user_location',
 };

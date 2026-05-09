@@ -40,6 +40,7 @@ export const usePrayerStore = create<PrayerStore>((set, get) => ({
   setLocation: (lat, lng, city) => {
     const times = calculatePrayerTimes(lat, lng);
     set({ location: { lat, lng, city }, prayerTimes: times });
+    saveData(STORAGE_KEYS.LOCATION, { lat, lng, city });
   },
 
   togglePrayer: (dateKey, prayer) => {
