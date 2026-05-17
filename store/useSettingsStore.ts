@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { saveData, loadData, STORAGE_KEYS } from '../services/storageService';
 
-export type NotificationSound = 'ezan' | 'ilahi' | 'salavat';
+export type NotificationSound = 'ezan' | 'ilahi' | 'salavat' | 'custom';
 export type Language = 'tr' | 'en' | 'ar';
 
 export interface AppSettings {
@@ -17,6 +17,8 @@ export interface AppSettings {
   vibration: boolean;
   calculationMethod: string;
   notificationSound: NotificationSound;
+  customSoundUri?: string;
+  customSoundName?: string;
   language: Language;
 }
 

@@ -12,6 +12,7 @@ import { useNotificationStore } from '../store/useNotificationStore';
 import { useTutorialStore } from '../store/useTutorialStore';
 import {
   setupNotificationChannel,
+  setupCustomNotificationChannel,
   setupNotificationHandler,
   requestNotificationPermission,
   scheduleAllNotifications,
@@ -60,6 +61,13 @@ export default function RootLayout() {
     }
   }, [tutorialLoaded, tutorialDone]);
 
+  // Restore custom notification channel on startup if user had one saved
+  useEffect(() => {
+    if (settings.notificationSound === 'custom' && settings.customSoundUri) {
+      setupCustomNotificationChannel(settings.customSoundUri).catch(() => {});
+    }
+  }, [settings.customSoundUri]);
+
   // Reschedule notifications + update widget when location or settings change
   useEffect(() => {
     if (!location) return;
@@ -67,7 +75,7 @@ export default function RootLayout() {
     if (Platform.OS === 'android') {
       requestWidgetUpdate({ widgetName: 'PrayerWidget', renderWidget: () => undefined as any }).catch(() => {});
     }
-  }, [location?.lat, location?.lng, settings.notifications, settings.silentHours]);
+  }, [location?.lat, location?.lng, settings.notifications, settings.silentHours, settings.notificationSound, settings.customSoundUri]);
 
   return (
     <>

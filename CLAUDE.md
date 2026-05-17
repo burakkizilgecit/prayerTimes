@@ -86,6 +86,14 @@ git add -A && git commit -m "mesaj" && git push origin master
 node scripts/create-silent-sounds.js
 ```
 
+## Özel Bildirim Sesi (Eklenmiş)
+- `NotificationSound` tipi artık `'ezan' | 'ilahi' | 'salavat' | 'custom'`
+- `AppSettings.customSoundUri` (content:// URI) + `customSoundName` eklendi
+- `services/soundPickerService.ts` → `pickSystemRingtone()` + `pickAudioFile()`
+- `services/notificationService.ts` → `setupCustomNotificationChannel(uri)`
+- Android kanalı her ses değişiminde delete+recreate (channel sound lock-in)
+- Paketler: `expo-document-picker`, `expo-intent-launcher`
+
 ## Bilinen Sorunlar / TODO
 - Bildirim ses dosyaları hâlâ sessiz placeholder (gerçek ses eklenecek)
 - Gizlilik politikası GitHub Pages'e yüklenmeli

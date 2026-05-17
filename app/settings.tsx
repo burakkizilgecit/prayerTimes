@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Switch, StatusBar, Modal, Linking,
+  Switch, StatusBar, Modal, Linking, ActivityIndicator, Platform,
 } from 'react-native';
 import { Audio } from 'expo-av';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,6 +12,10 @@ import { Alert } from 'react-native';
 import { useTutorialStore } from '../store/useTutorialStore';
 import type { NotificationSound } from '../store/useSettingsStore';
 import { useTranslation, applyRTL, type Language } from '../i18n';
+import { pickSystemRingtone, pickAudioFile } from '../services/soundPickerService';
+import { setupCustomNotificationChannel } from '../services/notificationService';
+import { scheduleAllNotifications } from '../services/notificationService';
+import { usePrayerStore } from '../store/usePrayerStore';
 
 const SOUNDS: { key: NotificationSound; label: string; desc: string; icon: string; file: any }[] = [
   {
@@ -159,7 +163,10 @@ export default function SettingsScreen() {
   const router = useRouter();
   const { settings, toggleNotification, updateSettings } = useSettingsStore();
   const { reset: resetTutorial } = useTutorialStore();
+  const location = usePrayerStore(s => s.location);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showSoundPicker, setShowSoundPicker] = useState(false);
+  const [isSoundLoading, setIsSoundLoading] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
 
   const previewSound = async (sound: NotificationSound) => {
@@ -171,6 +178,53 @@ export default function SettingsScreen() {
       soundRef.current = s;
       s.setOnPlaybackStatusUpdate(st => { if (st.isLoaded && st.didJustFinish) s.unloadAsync(); });
     } catch {}
+  };
+
+  const previewCustomSound = async (uri: string) => {
+    try {
+      if (soundRef.current) { await soundRef.current.unloadAsync(); soundRef.current = null; }
+      const { sound: s } = await Audio.Sound.createAsync({ uri }, { shouldPlay: true });
+      soundRef.current = s;
+      s.setOnPlaybackStatusUpdate(st => { if (st.isLoaded && st.didJustFinish) s.unloadAsync(); });
+    } catch {}
+  };
+
+  const applyCustomSound = async (uri: string, name: string) => {
+    setShowSoundPicker(false);
+    setIsSoundLoading(true);
+    try {
+      await setupCustomNotificationChannel(uri);
+      updateSettings({ notificationSound: 'custom', customSoundUri: uri, customSoundName: name });
+      if (location) {
+        await scheduleAllNotifications(location.lat, location.lng, {
+          ...settings,
+          notificationSound: 'custom',
+          customSoundUri: uri,
+          customSoundName: name,
+        });
+      }
+    } catch {
+      Alert.alert('Hata', 'Ses ayarlanamadı. Lütfen tekrar deneyin.');
+    } finally {
+      setIsSoundLoading(false);
+    }
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  };
+
+  const handlePickRingtone = async () => {
+    if (Platform.OS !== 'android') {
+      Alert.alert('Bilgi', 'Zil sesi seçimi yalnızca Android\'de desteklenmektedir.');
+      return;
+    }
+    setShowSoundPicker(false);
+    const picked = await pickSystemRingtone();
+    if (picked) await applyCustomSound(picked.uri, picked.name);
+  };
+
+  const handlePickAudioFile = async () => {
+    setShowSoundPicker(false);
+    const picked = await pickAudioFile();
+    if (picked) await applyCustomSound(picked.uri, picked.name);
   };
 
   const { t } = useTranslation();
@@ -217,6 +271,44 @@ export default function SettingsScreen() {
         <Text style={styles.headerTitle}>Ayarlar</Text>
         <View style={{ width: 40 }} />
       </View>
+
+      {/* Sound Picker Modal */}
+      <Modal visible={showSoundPicker} transparent animationType="fade" onRequestClose={() => setShowSoundPicker(false)}>
+        <View style={styles.pickerOverlay}>
+          <View style={styles.pickerCard}>
+            <Text style={styles.pickerTitle}>Ses Kaynağı Seç</Text>
+            <Text style={styles.pickerHint}>Bildirim sesi için kaynak türünü belirleyin.</Text>
+
+            <TouchableOpacity style={styles.soundPickerRow} onPress={handlePickRingtone} activeOpacity={0.7}>
+              <View style={styles.soundPickerIconBox}>
+                <Ionicons name="musical-notes-outline" size={22} color={COLORS.gold} />
+              </View>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingLabel}>Zil Seslerinden Seç</Text>
+                <Text style={styles.settingDesc2}>Telefonunuzdaki sistem zil seslerini görüntüleyin</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
+            </TouchableOpacity>
+
+            <View style={{ height: 1, backgroundColor: COLORS.cardBorder, marginVertical: SPACING.xs }} />
+
+            <TouchableOpacity style={styles.soundPickerRow} onPress={handlePickAudioFile} activeOpacity={0.7}>
+              <View style={styles.soundPickerIconBox}>
+                <Ionicons name="folder-open-outline" size={22} color={COLORS.gold} />
+              </View>
+              <View style={styles.settingInfo}>
+                <Text style={styles.settingLabel}>Ses Dosyasından Seç</Text>
+                <Text style={styles.settingDesc2}>Müzik, ses kaydı veya herhangi bir ses dosyası</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.pickerCancelBtn, { marginTop: SPACING.md }]} onPress={() => setShowSoundPicker(false)}>
+              <Text style={styles.pickerCancelText}>İptal</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ padding: SPACING.md }}>
         {/* Notification Settings */}
@@ -274,7 +366,7 @@ export default function SettingsScreen() {
             return (
               <TouchableOpacity
                 key={s.key}
-                style={[styles.soundRow, i < SOUNDS.length - 1 && styles.rowBorder]}
+                style={[styles.soundRow, styles.rowBorder]}
                 onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); updateSettings({ notificationSound: s.key }); }}
                 activeOpacity={0.7}
               >
@@ -298,6 +390,49 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             );
           })}
+
+          {/* Custom sound from device */}
+          {(() => {
+            const active = settings.notificationSound === 'custom';
+            const hasCustom = !!settings.customSoundUri;
+            return (
+              <TouchableOpacity
+                style={styles.soundRow}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  setShowSoundPicker(true);
+                }}
+                activeOpacity={0.7}
+              >
+                <View style={[styles.soundIconBox, active && styles.soundIconBoxActive]}>
+                  {isSoundLoading
+                    ? <ActivityIndicator size="small" color={active ? COLORS.background : COLORS.gold} />
+                    : <Ionicons name="phone-portrait-outline" size={20} color={active ? COLORS.background : COLORS.gold} />
+                  }
+                </View>
+                <View style={styles.settingInfo}>
+                  <Text style={[styles.settingLabel, active && { color: COLORS.gold }]}>
+                    {active && hasCustom ? settings.customSoundName! : 'Telefondan Seç'}
+                  </Text>
+                  <Text style={styles.settingDesc2}>
+                    {active ? 'Değiştirmek için dokun' : 'Zil sesi veya ses dosyası seç'}
+                  </Text>
+                </View>
+                {active && hasCustom && (
+                  <TouchableOpacity
+                    style={styles.previewBtn}
+                    onPress={() => previewCustomSound(settings.customSoundUri!)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Ionicons name="play-circle-outline" size={22} color={COLORS.textMuted} />
+                  </TouchableOpacity>
+                )}
+                <View style={[styles.radioOuter, active && styles.radioOuterActive]}>
+                  {active && <View style={styles.radioInner} />}
+                </View>
+              </TouchableOpacity>
+            );
+          })()}
         </View>
 
         {/* Other Settings */}
@@ -455,6 +590,9 @@ const styles = StyleSheet.create({
   langLabel:         { color: COLORS.textSecondary, fontSize: FONT_SIZE.xs, fontWeight: '600' },
   langLabelActive:   { color: COLORS.gold, fontWeight: '800' },
   langDot:           { width: 6, height: 6, borderRadius: 3, backgroundColor: COLORS.gold },
+
+  soundPickerRow:    { flexDirection: 'row', alignItems: 'center', paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm + 4, gap: SPACING.sm },
+  soundPickerIconBox:{ width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(200,168,83,0.12)', alignItems: 'center', justifyContent: 'center' },
 
   // Time Picker Modal
   pickerOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', alignItems: 'center', justifyContent: 'center' },

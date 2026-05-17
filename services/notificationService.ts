@@ -30,6 +30,21 @@ export async function setupNotificationChannel() {
   });
 }
 
+// Creates (or recreates) the custom sound channel — must be called before scheduling
+export async function setupCustomNotificationChannel(soundUri: string): Promise<void> {
+  if (Platform.OS !== 'android') return;
+  // Android locks channel sound after first use, so delete + recreate
+  await Notifications.deleteNotificationChannelAsync('prayer_custom');
+  await Notifications.setNotificationChannelAsync('prayer_custom', {
+    name: 'Namaz Vakitleri (Özel Ses)',
+    importance: Notifications.AndroidImportance.HIGH,
+    vibrationPattern: [0, 400, 200, 400],
+    lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
+    bypassDnd: false,
+    sound: soundUri,
+  });
+}
+
 // ── Permission ────────────────────────────────────────────────────────────
 export async function requestNotificationPermission(): Promise<boolean> {
   const { status } = await Notifications.requestPermissionsAsync({
