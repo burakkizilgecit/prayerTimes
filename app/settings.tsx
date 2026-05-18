@@ -160,26 +160,40 @@ export default function SettingsScreen() {
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showSoundPicker, setShowSoundPicker] = useState(false);
   const [isSoundLoading, setIsSoundLoading] = useState(false);
+  const [playingKey, setPlayingKey] = useState<string | null>(null);
   const soundRef = useRef<Audio.Sound | null>(null);
+
+  const stopPreview = async () => {
+    if (soundRef.current) { await soundRef.current.stopAsync(); await soundRef.current.unloadAsync(); soundRef.current = null; }
+    setPlayingKey(null);
+  };
 
   const previewSound = async (sound: NotificationSound) => {
     try {
-      if (soundRef.current) { await soundRef.current.unloadAsync(); soundRef.current = null; }
+      if (playingKey === sound) { await stopPreview(); return; }
+      await stopPreview();
       const file = SOUNDS.find(s => s.key === sound)?.file;
       if (!file) return;
+      setPlayingKey(sound);
       const { sound: s } = await Audio.Sound.createAsync(file, { shouldPlay: true });
       soundRef.current = s;
-      s.setOnPlaybackStatusUpdate(st => { if (st.isLoaded && st.didJustFinish) s.unloadAsync(); });
-    } catch {}
+      s.setOnPlaybackStatusUpdate(st => {
+        if (st.isLoaded && st.didJustFinish) { s.unloadAsync(); setPlayingKey(null); }
+      });
+    } catch { setPlayingKey(null); }
   };
 
   const previewCustomSound = async (uri: string) => {
     try {
-      if (soundRef.current) { await soundRef.current.unloadAsync(); soundRef.current = null; }
+      if (playingKey === 'custom') { await stopPreview(); return; }
+      await stopPreview();
+      setPlayingKey('custom');
       const { sound: s } = await Audio.Sound.createAsync({ uri }, { shouldPlay: true });
       soundRef.current = s;
-      s.setOnPlaybackStatusUpdate(st => { if (st.isLoaded && st.didJustFinish) s.unloadAsync(); });
-    } catch {}
+      s.setOnPlaybackStatusUpdate(st => {
+        if (st.isLoaded && st.didJustFinish) { s.unloadAsync(); setPlayingKey(null); }
+      });
+    } catch { setPlayingKey(null); }
   };
 
   const applyCustomSound = async (uri: string, name: string) => {
@@ -371,11 +385,15 @@ export default function SettingsScreen() {
                   <Text style={styles.settingDesc2}>{s.desc}</Text>
                 </View>
                 <TouchableOpacity
-                  style={styles.previewBtn}
+                  style={[styles.previewBtn, playingKey === s.key && styles.previewBtnActive]}
                   onPress={() => previewSound(s.key)}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
-                  <Ionicons name="play-circle-outline" size={22} color={COLORS.textMuted} />
+                  <Ionicons
+                    name={playingKey === s.key ? 'pause-circle' : 'play-circle-outline'}
+                    size={24}
+                    color={playingKey === s.key ? COLORS.gold : COLORS.textMuted}
+                  />
                 </TouchableOpacity>
                 <View style={[styles.radioOuter, active && styles.radioOuterActive]}>
                   {active && <View style={styles.radioInner} />}
@@ -413,11 +431,15 @@ export default function SettingsScreen() {
                 </View>
                 {active && hasCustom && (
                   <TouchableOpacity
-                    style={styles.previewBtn}
+                    style={[styles.previewBtn, playingKey === 'custom' && styles.previewBtnActive]}
                     onPress={() => previewCustomSound(settings.customSoundUri!)}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Ionicons name="play-circle-outline" size={22} color={COLORS.textMuted} />
+                    <Ionicons
+                      name={playingKey === 'custom' ? 'pause-circle' : 'play-circle-outline'}
+                      size={24}
+                      color={playingKey === 'custom' ? COLORS.gold : COLORS.textMuted}
+                    />
                   </TouchableOpacity>
                 )}
                 <View style={[styles.radioOuter, active && styles.radioOuterActive]}>
@@ -572,6 +594,7 @@ const styles = StyleSheet.create({
   soundIconBox:      { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(200,168,83,0.12)', alignItems: 'center', justifyContent: 'center' },
   soundIconBoxActive:{ backgroundColor: COLORS.gold },
   previewBtn:        { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
+  previewBtnActive:  { opacity: 1 },
   radioOuter:        { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: COLORS.cardBorder, alignItems: 'center', justifyContent: 'center' },
   radioOuterActive:  { borderColor: COLORS.gold },
   radioInner:        { width: 10, height: 10, borderRadius: 5, backgroundColor: COLORS.gold },
