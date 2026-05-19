@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "android": {
       "package": "com.islamicibadet.app",
-      "versionCode": 11,
+      "versionCode": 12,
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyCsJqytioV-H-SJGWSGZwQOOdZs-HQblWA"
@@ -95,6 +95,7 @@
         }
       ],
       "./plugins/withBuildConfig",
+      "./plugins/withRemovePermissions",
       [
         "react-native-android-widget",
         {
