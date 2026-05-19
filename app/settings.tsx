@@ -714,14 +714,14 @@ export default function SettingsScreen() {
             </View>
             <View style={styles.settingInfo}>
               <Text style={styles.settingLabel}>Uygulama Sürümü</Text>
-              <Text style={styles.settingDesc2}>İbadet Rehberi v{APP_VERSION}</Text>
+              <Text style={styles.settingDesc2}>Ezan Vakti v{APP_VERSION}</Text>
             </View>
           </View>
         </View>
 
         <View style={styles.appInfo}>
           <MaterialCommunityIcons name="mosque" size={32} color={colors.gold} style={{ opacity: 0.5 }} />
-          <Text style={styles.appName}>İbadet Rehberi</Text>
+          <Text style={styles.appName}>Ezan Vakti</Text>
           <Text style={styles.appVersion}>Sürüm {APP_VERSION}</Text>
           <Text style={styles.appCopyright}>© 2025 Tüm hakları saklıdır.</Text>
         </View>

@@ -1,4 +1,4 @@
-# İbadet Rehberi — Claude Kılavuzu
+# Ezan Vakti — Claude Kılavuzu
 
 ## Proje Özeti
 React Native / Expo SDK 54 ile geliştirilmiş İslami ibadet takip uygulaması.

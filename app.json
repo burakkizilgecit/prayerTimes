@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "İbadet Rehberi",
+    "name": "Ezan Vakti",
     "slug": "islamicibadet",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -101,7 +101,7 @@
           "widgets": [
             {
               "name": "PrayerWidget",
-              "label": "İbadet Rehberi — Namaz Vakti",
+              "label": "Ezan Vakti — Namaz Vakti",
               "description": "Sıradaki namaz vaktini ana ekranınızda görün",
               "previewImage": "./assets/images/icon.png",
               "minWidth": "250dp",

@@ -28,7 +28,7 @@ const SLIDES: Slide[] = [
   {
     id: '1', type: 'regular', iconLib: 'mci', icon: 'mosque',
     accent: '#C8A853',
-    title: 'İbadet Rehberi\'ne\nHoş Geldiniz',
+    title: 'Ezan Vakti\'ne\nHoş Geldiniz',
     desc: 'Günlük ibadetlerinizi düzenli tutmanıza yardımcı olan kapsamlı İslami yaşam uygulaması.',
   },
   {
@@ -83,7 +83,7 @@ const SLIDES: Slide[] = [
     id: '10', type: 'regular', iconLib: 'ion', icon: 'checkmark-circle-outline',
     accent: '#4ADE80',
     title: 'Her Şey Hazır!',
-    desc: 'İbadet Rehberi ile günlük ibadetlerinizi düzenli, bilinçli ve huzurlu şekilde sürdürün.\n\nAllah kabul etsin 🤲',
+    desc: 'Ezan Vakti ile günlük ibadetlerinizi düzenli, bilinçli ve huzurlu şekilde sürdürün.\n\nAllah kabul etsin 🤲',
   },
 ];
 

@@ -80,7 +80,7 @@ const ShareCard = forwardRef<View, Props>(({ data }, ref) => {
       {/* Footer */}
       <View style={styles.footer}>
         <MaterialCommunityIcons name="mosque" size={16} color={COLORS.gold} />
-        <Text style={styles.footerText}>İbadet Rehberi</Text>
+        <Text style={styles.footerText}>Ezan Vakti</Text>
       </View>
     </View>
   );
