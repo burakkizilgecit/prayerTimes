@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useRouter } from 'expo-router';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   StatusBar, ActivityIndicator, ImageBackground, Dimensions,
@@ -141,8 +142,17 @@ const makeStyles = (colors: any, fs: (n: number) => number) => StyleSheet.create
   shareConfirmText:  { color: colors.background, fontSize: fs(FONT_SIZE.md), fontWeight: '800' },
 });
 
+const NOTIF_ROUTES: Record<string, string> = {
+  prayer: '/(tabs)/prayer-times',
+  hadith: '/(tabs)',
+  dua:    '/(tabs)/duas',
+  dhikr:  '/(tabs)/dhikr',
+  event:  '/upcoming-events',
+};
+
 export default function HomeScreen() {
   const { colors, fs } = useTheme();
+  const router = useRouter();
   const { prayerTimes, location, setLocation, loadCompletion, togglePrayer, getTodayCompletion } = usePrayerStore();
   const { notifications, loadNotifications, markRead, markAllRead, getUnreadCount, generateDailyIfNeeded } = useNotificationStore();
   const [countdown, setCountdown] = useState('--:--:--');
@@ -264,7 +274,14 @@ export default function HomeScreen() {
                 renderItem={({ item }) => (
                   <TouchableOpacity
                     style={[styles.notifItem, item.read && styles.notifItemRead]}
-                    onPress={() => markRead(item.id)}
+                    onPress={() => {
+                      markRead(item.id);
+                      const route = NOTIF_ROUTES[item.type];
+                      if (route) {
+                        setShowNotifs(false);
+                        setTimeout(() => router.push(route as any), 150);
+                      }
+                    }}
                   >
                     <View style={[styles.notifIconBox, item.read && { opacity: 0.5 }]}>
                       <MaterialCommunityIcons name={NOTIF_ICONS[item.type] as any} size={20} color={colors.gold} />
