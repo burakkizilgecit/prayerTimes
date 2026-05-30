@@ -6,7 +6,7 @@ import { SPACING, RADIUS, FONT_SIZE } from '../../constants/theme';
 import { useTheme } from '../../context/ThemeContext';
 import { usePrayerStore } from '../../store/usePrayerStore';
 import { formatPrayerTime, getNextPrayer } from '../../services/prayerService';
-import { formatGregorianDate, GREGORIAN_MONTHS_TR } from '../../services/hijriService';
+import { formatGregorianDate } from '../../services/hijriService';
 import { calculatePrayerTimes } from '../../services/prayerService';
 import { useTranslation } from '../../i18n';
 
@@ -137,7 +137,7 @@ export default function PrayerTimesScreen() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [shownTimes, setShownTimes] = useState(prayerTimes);
   const [infoModal, setInfoModal] = useState<{ key: string; info: PrayerInfo } | null>(null);
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const now = new Date();
   const todayKey = now.toISOString().split('T')[0];
   const completion = getTodayCompletion();
@@ -178,7 +178,7 @@ export default function PrayerTimesScreen() {
           <Ionicons name="chevron-back" size={22} color={colors.gold} />
         </TouchableOpacity>
         <View style={styles.dateCenterBox}>
-          <Text style={styles.dateNavText}>{formatGregorianDate(selectedDate)}</Text>
+          <Text style={styles.dateNavText}>{formatGregorianDate(selectedDate, language)}</Text>
           {isToday && <View style={styles.todayDot} />}
         </View>
         <TouchableOpacity onPress={() => changeDay(1)} style={styles.navBtn}>
@@ -228,7 +228,10 @@ export default function PrayerTimesScreen() {
                   {time ? formatPrayerTime(time) : '--:--'}
                 </Text>
                 {isToday && isToggleable && (
-                  <TouchableOpacity onPress={() => togglePrayer(todayKey, key as any)} style={styles.checkBtn}>
+                  <TouchableOpacity
+                    onPress={() => isPast && togglePrayer(todayKey, key as any)}
+                    style={[styles.checkBtn, !isPast && { opacity: 0.3 }]}
+                  >
                     <Ionicons
                       name={isDone ? 'checkmark-circle' : 'ellipse-outline'}
                       size={26}

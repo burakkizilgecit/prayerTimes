@@ -47,8 +47,15 @@ function RootLayoutInner() {
     setupNotificationChannel();
 
     // Handle notification taps
-    notifListener.current = Notifications.addNotificationResponseReceivedListener(() => {
-      // Could navigate to relevant screen here
+    notifListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data as any;
+      if (data?.type === 'prayer' || data?.type === 'early') {
+        router.push('/(tabs)/prayer-times' as any);
+      } else if (data?.type === 'dhikr') {
+        router.push('/(tabs)/dhikr' as any);
+      } else if (data?.type === 'dua') {
+        router.push('/(tabs)/duas' as any);
+      }
     });
 
     // Request permission

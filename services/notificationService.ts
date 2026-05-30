@@ -155,6 +155,7 @@ export async function scheduleAllNotifications(
         title: '📿 Zikir Hatırlatması',
         body: 'Bugün zikir yapmayı unutmayın. Kalpler ancak Allah\'ı zikirle huzur bulur.',
         sound: true,
+        data: { type: 'dhikr' },
         ...(Platform.OS === 'android' && { channelId: 'reminder' }),
       },
       trigger: {

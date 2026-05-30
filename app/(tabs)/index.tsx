@@ -18,7 +18,7 @@ import { useNotificationStore } from '../../store/useNotificationStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
 import { useTranslation, applyRTL, type Language } from '../../i18n';
 import { formatPrayerTime, getNextPrayer, getCountdown } from '../../services/prayerService';
-import { formatGregorianDate, formatHijriDate, DAYS_TR } from '../../services/hijriService';
+import { formatGregorianDate, formatHijriDate, getDayName } from '../../services/hijriService';
 import { getDailyHadith } from '../../data/hadiths';
 import { getDailyDua } from '../../data/duas';
 
@@ -361,9 +361,9 @@ export default function HomeScreen() {
 
               {/* Date */}
               <View style={styles.dateContainer}>
-                <Text style={styles.dayText}>{DAYS_TR[now.getDay()]}</Text>
-                <Text style={styles.dateText}>{formatGregorianDate(now)}</Text>
-                <Text style={styles.hijriText}>{formatHijriDate(now)}</Text>
+                <Text style={styles.dayText}>{getDayName(now, language)}</Text>
+                <Text style={styles.dateText}>{formatGregorianDate(now, language)}</Text>
+                <Text style={styles.hijriText}>{formatHijriDate(now, language)}</Text>
               </View>
 
               {/* Next Prayer Card — countdown is the hero */}
@@ -425,7 +425,10 @@ export default function HomeScreen() {
                       {time ? formatPrayerTime(time) : '--:--'}
                     </Text>
                     {isToggleable ? (
-                      <TouchableOpacity onPress={() => togglePrayer(todayKey, key as any)} style={{ marginLeft: SPACING.sm }}>
+                      <TouchableOpacity
+                        onPress={() => isPast && togglePrayer(todayKey, key as any)}
+                        style={{ marginLeft: SPACING.sm, opacity: isPast ? 1 : 0.3 }}
+                      >
                         <Ionicons
                           name={isDone ? 'checkmark-circle' : 'ellipse-outline'}
                           size={22}

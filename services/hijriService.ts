@@ -1,16 +1,29 @@
-export const HIJRI_MONTHS_TR = [
-  'Muharrem', 'Safer', 'Rebiülevvel', 'Rebiülahir',
-  'Cemaziyelevvel', 'Cemaziyelahir', 'Recep', 'Şaban',
-  'Ramazan', 'Şevval', 'Zilkade', 'Zilhicce',
-];
+const HIJRI_MONTHS: Record<string, string[]> = {
+  tr: ['Muharrem', 'Safer', 'Rebiülevvel', 'Rebiülahir', 'Cemaziyelevvel', 'Cemaziyelahir', 'Recep', 'Şaban', 'Ramazan', 'Şevval', 'Zilkade', 'Zilhicce'],
+  en: ['Muharram', 'Safar', "Rabi' al-Awwal", "Rabi' al-Thani", 'Jumada al-Awwal', 'Jumada al-Thani', 'Rajab', "Sha'ban", 'Ramadan', 'Shawwal', "Dhu al-Qi'dah", 'Dhu al-Hijjah'],
+  ar: ['محرم', 'صفر', 'ربيع الأول', 'ربيع الثاني', 'جمادى الأولى', 'جمادى الآخرة', 'رجب', 'شعبان', 'رمضان', 'شوال', 'ذو القعدة', 'ذو الحجة'],
+};
 
-export const GREGORIAN_MONTHS_TR = [
-  'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-  'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
-];
+const GREGORIAN_MONTHS: Record<string, string[]> = {
+  tr: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+  ar: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+};
 
-export const DAYS_TR = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+const DAYS: Record<string, string[]> = {
+  tr: ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'],
+  en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+  ar: ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
+};
+
+export const HIJRI_MONTHS_TR = HIJRI_MONTHS.tr;
+export const GREGORIAN_MONTHS_TR = GREGORIAN_MONTHS.tr;
+export const DAYS_TR = DAYS.tr;
 export const DAYS_SHORT_TR = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+
+export function getDayName(date: Date, lang = 'tr'): string {
+  return (DAYS[lang] ?? DAYS.tr)[date.getDay()];
+}
 
 function toJulianDay(year: number, month: number, day: number): number {
   if (month <= 2) { year -= 1; month += 12; }
@@ -38,11 +51,13 @@ export function gregorianToHijri(date: Date): { year: number; month: number; day
   return { year, month, day };
 }
 
-export function formatHijriDate(date: Date): string {
+export function formatHijriDate(date: Date, lang = 'tr'): string {
   const h = gregorianToHijri(date);
-  return `${h.day} ${HIJRI_MONTHS_TR[h.month - 1]} ${h.year}`;
+  const months = HIJRI_MONTHS[lang] ?? HIJRI_MONTHS.tr;
+  return `${h.day} ${months[h.month - 1]} ${h.year}`;
 }
 
-export function formatGregorianDate(date: Date): string {
-  return `${date.getDate()} ${GREGORIAN_MONTHS_TR[date.getMonth()]} ${date.getFullYear()}`;
+export function formatGregorianDate(date: Date, lang = 'tr'): string {
+  const months = GREGORIAN_MONTHS[lang] ?? GREGORIAN_MONTHS.tr;
+  return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
 }
