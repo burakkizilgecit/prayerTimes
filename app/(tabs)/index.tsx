@@ -16,7 +16,7 @@ import { SPACING, RADIUS, FONT_SIZE } from '../../constants/theme';
 import { useTheme } from '../../context/ThemeContext';
 import { usePrayerStore } from '../../store/usePrayerStore';
 import { useNotificationStore } from '../../store/useNotificationStore';
-import { useSettingsStore, type AccentColor } from '../../store/useSettingsStore';
+import { useSettingsStore } from '../../store/useSettingsStore';
 import { useTranslation, applyRTL, type Language } from '../../i18n';
 import { formatPrayerTime, getNextPrayer, getCountdown } from '../../services/prayerService';
 import { formatGregorianDate, formatHijriDate, getDayName } from '../../services/hijriService';
@@ -106,10 +106,12 @@ const makeStyles = (colors: any, fs: (n: number) => number) => StyleSheet.create
   notifSettingBorder:  { borderBottomWidth: 1, borderBottomColor: colors.cardBorder },
   notifSettingIcon:    { marginRight: SPACING.sm },
   notifSettingLabel:   { flex: 1, color: colors.textPrimary, fontSize: fs(FONT_SIZE.sm), fontWeight: '500' },
-  accentRow:           { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, paddingVertical: SPACING.sm, borderBottomWidth: 1, borderBottomColor: colors.cardBorder },
-  accentLabel:         { color: colors.textMuted, fontSize: fs(FONT_SIZE.xs), flex: 1 },
-  accentDot:           { width: 26, height: 26, borderRadius: 13, borderWidth: 2, borderColor: 'transparent' },
-  accentDotActive:     { borderColor: colors.textPrimary, transform: [{ scale: 1.15 }] },
+  themeRow:            { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs, paddingVertical: SPACING.sm, borderBottomWidth: 1, borderBottomColor: colors.cardBorder },
+  themeLabel:          { color: colors.textMuted, fontSize: fs(FONT_SIZE.xs), flex: 1 },
+  themeBtn:            { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: SPACING.sm, paddingVertical: 5, borderRadius: RADIUS.full, borderWidth: 1, borderColor: colors.cardBorder },
+  themeBtnActive:      { borderColor: colors.gold, backgroundColor: colors.goldGlow },
+  themeBtnText:        { color: colors.textMuted, fontSize: 11, fontWeight: '600' },
+  themeBtnTextActive:  { color: colors.gold },
   notifLangRow:        { flexDirection: 'row', alignItems: 'center', gap: SPACING.xs, paddingVertical: SPACING.sm, borderBottomWidth: 1, borderBottomColor: colors.cardBorder, marginBottom: SPACING.xs },
   notifLangTitle:      { color: colors.textMuted, fontSize: fs(FONT_SIZE.xs), flex: 1 },
   notifLangBtn:        { paddingHorizontal: SPACING.sm, paddingVertical: 4, borderRadius: RADIUS.full, borderWidth: 1, borderColor: colors.cardBorder },
@@ -311,24 +313,21 @@ export default function HomeScreen() {
               <Text style={styles.notifSettingsTitle}>{t('settingsNotifications')}</Text>
             </View>
 
-            {/* Accent color picker */}
-            <View style={styles.accentRow}>
-              <MaterialCommunityIcons name="palette-outline" size={16} color={colors.textMuted} />
-              <Text style={styles.accentLabel}>{t('settingsThemeColor' as any) ?? 'Tema Rengi'}:</Text>
-              {([
-                { key: 'gold',    color: '#D4A84B' },
-                { key: 'emerald', color: '#34C759' },
-                { key: 'blue',    color: '#0A84FF' },
-                { key: 'rose',    color: '#FF6B9D' },
-                { key: 'purple',  color: '#BF5AF2' },
-              ] as { key: AccentColor; color: string }[]).map(({ key, color }) => {
-                const active = (settings.accentColor ?? 'gold') === key;
+            {/* Theme toggle */}
+            <View style={styles.themeRow}>
+              <Ionicons name="contrast-outline" size={16} color={colors.textMuted} />
+              <Text style={styles.themeLabel}>{t('settingsTheme' as any) ?? 'Tema'}:</Text>
+              {(['dark', 'light'] as const).map((t_) => {
+                const active = (settings.theme ?? 'dark') === t_;
+                const label  = t_ === 'dark' ? '🌙 Gece' : '☀️ Gündüz';
                 return (
                   <TouchableOpacity
-                    key={key}
-                    onPress={() => updateSettings({ accentColor: key })}
-                    style={[styles.accentDot, { backgroundColor: color }, active && styles.accentDotActive]}
-                  />
+                    key={t_}
+                    style={[styles.themeBtn, active && styles.themeBtnActive]}
+                    onPress={() => updateSettings({ theme: t_ })}
+                  >
+                    <Text style={[styles.themeBtnText, active && styles.themeBtnTextActive]}>{label}</Text>
+                  </TouchableOpacity>
                 );
               })}
             </View>

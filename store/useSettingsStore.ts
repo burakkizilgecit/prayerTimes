@@ -3,7 +3,6 @@ import { saveData, loadData, STORAGE_KEYS } from '../services/storageService';
 
 export type NotificationSound = 'ezan' | 'ilahi' | 'custom';
 export type Language = 'tr' | 'en' | 'ar';
-export type AccentColor = 'gold' | 'emerald' | 'blue' | 'rose' | 'purple';
 
 export interface AppSettings {
   notifications: {
@@ -23,7 +22,6 @@ export interface AppSettings {
   language: Language;
   theme?: 'dark' | 'light';
   fontSize?: 'normal' | 'large' | 'xlarge';
-  accentColor?: AccentColor;
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -42,7 +40,6 @@ const DEFAULT_SETTINGS: AppSettings = {
   language: 'tr',
   theme: 'dark',
   fontSize: 'normal',
-  accentColor: 'gold',
 };
 
 interface SettingsStore {
