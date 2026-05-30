@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "android": {
       "package": "com.islamicibadet.app",
-      "versionCode": 18,
+      "versionCode": 19,
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyCsJqytioV-H-SJGWSGZwQOOdZs-HQblWA"
