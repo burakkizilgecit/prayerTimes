@@ -7,7 +7,7 @@ import { SPACING, RADIUS, FONT_SIZE } from '../../constants/theme';
 import { useTheme } from '../../context/ThemeContext';
 import { usePrayerStore } from '../../store/usePrayerStore';
 import { calculateQiblaDirection } from '../../services/prayerService';
-import Svg, { Circle, Line, Text as SvgText, Path } from 'react-native-svg';
+import Svg, { Circle, Line, Text as SvgText, Path, Defs, RadialGradient, Stop, G } from 'react-native-svg';
 import { useTranslation } from '../../i18n';
 
 const LOW_PASS = 0.12;
@@ -19,23 +19,24 @@ function shortestDiff(from: number, to: number): number {
 }
 
 const makeStyles = (colors: any, fs: (n: number) => number) => StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, alignItems: 'center' },
-  header: { paddingVertical: SPACING.md, alignItems: 'center' },
-  headerTitle: { color: colors.textPrimary, fontSize: fs(FONT_SIZE.xl), fontWeight: '700' },
-  headerSub: { color: colors.gold, fontSize: fs(FONT_SIZE.sm), marginTop: 2 },
-  compassWrap: { width: 300, height: 300, alignItems: 'center', justifyContent: 'center', marginVertical: SPACING.lg },
-  layer: { position: 'absolute', width: 300, height: 300 },
-  centerDot: { position: 'absolute', width: 14, height: 14, borderRadius: 7, backgroundColor: colors.gold, zIndex: 10 },
-  infoRow: { flexDirection: 'row', paddingHorizontal: SPACING.md, gap: SPACING.sm, marginTop: SPACING.lg },
-  infoBox: { flex: 1, backgroundColor: colors.cardBg, borderColor: colors.cardBorder, borderWidth: 1, borderRadius: RADIUS.lg, padding: SPACING.md, alignItems: 'center', gap: SPACING.xs },
-  infoBoxCenter: { borderColor: colors.gold },
-  alignedBox: { borderColor: colors.green, backgroundColor: 'rgba(76,175,80,0.08)' },
-  infoLabel: { color: colors.textMuted, fontSize: fs(FONT_SIZE.xs) },
-  infoValue: { color: colors.textPrimary, fontSize: fs(FONT_SIZE.md), fontWeight: '700' },
-  alignedBanner: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginTop: SPACING.md, backgroundColor: 'rgba(76,175,80,0.15)', borderRadius: RADIUS.full, paddingHorizontal: SPACING.lg, paddingVertical: SPACING.sm },
-  alignedText: { color: colors.green, fontSize: fs(FONT_SIZE.md), fontWeight: '600' },
-  permissionBanner: { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginHorizontal: SPACING.md, marginTop: SPACING.md, backgroundColor: 'rgba(200,168,83,0.1)', borderRadius: RADIUS.md, padding: SPACING.md },
-  permissionText: { color: colors.textSecondary, fontSize: fs(FONT_SIZE.xs), flex: 1 },
+  container:      { flex: 1, backgroundColor: colors.background, alignItems: 'center' },
+  header:         { paddingVertical: SPACING.md, alignItems: 'center' },
+  headerTitle:    { color: colors.textPrimary, fontSize: fs(FONT_SIZE.xl), fontWeight: '700' },
+  headerSub:      { color: colors.gold, fontSize: fs(FONT_SIZE.sm), marginTop: 2 },
+  compassWrap:    { width: 320, height: 320, alignItems: 'center', justifyContent: 'center', marginVertical: SPACING.md },
+  layer:          { position: 'absolute', width: 320, height: 320 },
+  centerRing:     { position: 'absolute', width: 22, height: 22, borderRadius: 11, backgroundColor: colors.gold, zIndex: 10, alignItems: 'center', justifyContent: 'center' },
+  centerInner:    { width: 10, height: 10, borderRadius: 5, backgroundColor: colors.background },
+  infoRow:        { flexDirection: 'row', paddingHorizontal: SPACING.md, gap: SPACING.sm, width: '100%' },
+  infoBox:        { flex: 1, backgroundColor: colors.cardBg, borderColor: colors.cardBorder, borderWidth: 1, borderRadius: RADIUS.lg, paddingVertical: SPACING.md, paddingHorizontal: SPACING.xs, alignItems: 'center', gap: 4 },
+  infoBoxGold:    { borderColor: colors.gold },
+  infoBoxGreen:   { borderColor: colors.green, backgroundColor: 'rgba(76,175,80,0.06)' },
+  infoLabel:      { color: colors.textMuted, fontSize: fs(FONT_SIZE.xs), textAlign: 'center' },
+  infoValue:      { color: colors.textPrimary, fontSize: fs(FONT_SIZE.md), fontWeight: '700' },
+  alignedBanner:  { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginTop: SPACING.md, backgroundColor: 'rgba(76,175,80,0.15)', borderRadius: RADIUS.full, paddingHorizontal: SPACING.lg, paddingVertical: SPACING.sm },
+  alignedText:    { color: colors.green, fontSize: fs(FONT_SIZE.md), fontWeight: '600' },
+  permBanner:     { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, marginHorizontal: SPACING.md, marginTop: SPACING.md, backgroundColor: 'rgba(200,168,83,0.08)', borderRadius: RADIUS.md, padding: SPACING.md },
+  permText:       { color: colors.textSecondary, fontSize: fs(FONT_SIZE.xs), flex: 1 },
 });
 
 export default function QiblaScreen() {
@@ -43,31 +44,24 @@ export default function QiblaScreen() {
   const { location } = usePrayerStore();
   const { t } = useTranslation();
 
-  const [qiblaAngle, setQiblaAngle] = useState(0);
-  const [hasPermission, setHasPermission] = useState(false);
-  const [isAligned, setIsAligned] = useState(false);
-  const [displayMag, setDisplayMag] = useState(0);
+  const [qiblaAngle, setQiblaAngle]   = useState(0);
+  const [hasPermission, setHasPerm]   = useState(false);
+  const [isAligned, setIsAligned]     = useState(false);
+  const [displayMag, setDisplayMag]   = useState(0);
 
-  const rawMag    = useRef(0);
-  const qiblaRef  = useRef(0);
+  const rawMag     = useRef(0);
+  const qiblaRef   = useRef(0);
   const compassAcc = useRef(0);
   const arrowAcc   = useRef(0);
 
   const compassAnim = useRef(new Animated.Value(0)).current;
   const arrowAnim   = useRef(new Animated.Value(0)).current;
 
-  const compassRotate = compassAnim.interpolate({
-    inputRange: [0, 360], outputRange: ['0deg', '360deg'], extrapolate: 'extend',
-  });
-  const arrowRotate = arrowAnim.interpolate({
-    inputRange: [0, 360], outputRange: ['0deg', '360deg'], extrapolate: 'extend',
-  });
+  const compassRotate = compassAnim.interpolate({ inputRange: [0, 360], outputRange: ['0deg', '360deg'], extrapolate: 'extend' });
+  const arrowRotate   = arrowAnim.interpolate({   inputRange: [0, 360], outputRange: ['0deg', '360deg'], extrapolate: 'extend' });
 
   useEffect(() => {
-    const angle = calculateQiblaDirection(
-      location?.lat ?? 41.0082,
-      location?.lng ?? 28.9784,
-    );
+    const angle = calculateQiblaDirection(location?.lat ?? 41.0082, location?.lng ?? 28.9784);
     setQiblaAngle(angle);
     qiblaRef.current = angle;
   }, [location]);
@@ -76,29 +70,24 @@ export default function QiblaScreen() {
     let sub: ReturnType<typeof Magnetometer.addListener> | undefined;
     (async () => {
       const { granted } = await Magnetometer.requestPermissionsAsync();
-      setHasPermission(granted);
+      setHasPerm(granted);
       if (!granted) return;
 
       Magnetometer.setUpdateInterval(50);
       sub = Magnetometer.addListener(({ x, y }) => {
-        // atan2(-x, y) → degrees clockwise from North for a flat/tilted phone
         let raw = Math.atan2(-x, y) * (180 / Math.PI);
         raw = ((raw % 360) + 360) % 360;
 
-        // Low-pass filter (smooth noise, keep responsiveness)
         rawMag.current = ((rawMag.current + LOW_PASS * shortestDiff(rawMag.current, raw)) % 360 + 360) % 360;
         const mag = rawMag.current;
 
-        // Compass rose: rotate opposite to device heading
         const tCompass = (360 - mag) % 360;
         compassAcc.current += shortestDiff(((compassAcc.current % 360) + 360) % 360, tCompass);
 
-        // Qibla arrow: how many degrees from phone top to Mecca
         const tArrow = ((qiblaRef.current - mag) % 360 + 360) % 360;
         arrowAcc.current += shortestDiff(((arrowAcc.current % 360) + 360) % 360, tArrow);
 
-        const absDiff = Math.abs(((tArrow + 180) % 360) - 180);
-        setIsAligned(absDiff < 5);
+        setIsAligned(Math.abs(((tArrow + 180) % 360) - 180) < 5);
         setDisplayMag(Math.round(mag));
 
         Animated.spring(compassAnim, { toValue: compassAcc.current, useNativeDriver: true, tension: 55, friction: 11 }).start();
@@ -111,13 +100,16 @@ export default function QiblaScreen() {
   const styles = React.useMemo(() => makeStyles(colors, fs), [colors, fs]);
 
   const cardinals = [
-    { label: t('qiblaDirN'), angle: 0  },
-    { label: t('qiblaDirE'), angle: 90 },
+    { label: t('qiblaDirN'), angle: 0   },
+    { label: t('qiblaDirE'), angle: 90  },
     { label: t('qiblaDirS'), angle: 180 },
     { label: t('qiblaDirW'), angle: 270 },
   ];
 
+  const cx = 160, cy = 160, R = 148;
   const arrowColor = isAligned ? colors.green : colors.gold;
+
+  const diffDeg = Math.abs(((((qiblaAngle - displayMag) % 360) + 360) % 360 + 180) % 360 - 180);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -129,85 +121,148 @@ export default function QiblaScreen() {
       </View>
 
       <View style={styles.compassWrap}>
-        {/* Compass rose (rotates with phone orientation) */}
+
+        {/* ── Compass Rose ── */}
         <Animated.View style={[styles.layer, { transform: [{ rotate: compassRotate }] }]}>
-          <Svg width={300} height={300} viewBox="0 0 300 300">
-            <Circle cx="150" cy="150" r="138" stroke={colors.cardBorder} strokeWidth="2" fill="none" />
-            <Circle cx="150" cy="150" r="116" stroke={colors.cardBorder} strokeWidth="1" fill="none" strokeDasharray="4 8" />
-            {Array.from({ length: 36 }, (_, i) => {
-              const a = (i * 10 * Math.PI) / 180;
-              const isMajor = i % 9 === 0;
-              const isMid   = i % 3 === 0;
-              const r1 = isMajor ? 120 : isMid ? 125 : 129;
+          <Svg width={320} height={320} viewBox="0 0 320 320">
+            <Defs>
+              <RadialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+                <Stop offset="0%"   stopColor={colors.cardBg}    stopOpacity="0.6" />
+                <Stop offset="100%" stopColor={colors.background} stopOpacity="0" />
+              </RadialGradient>
+            </Defs>
+
+            {/* Background fill */}
+            <Circle cx={cx} cy={cy} r={R} fill="url(#bgGrad)" />
+
+            {/* Outer decorative ring */}
+            <Circle cx={cx} cy={cy} r={R}     stroke={colors.gold}       strokeWidth="1.5" fill="none" opacity="0.4" />
+            <Circle cx={cx} cy={cy} r={R - 8} stroke={colors.cardBorder} strokeWidth="1"   fill="none" />
+            {/* Inner dashed ring */}
+            <Circle cx={cx} cy={cy} r={R - 28} stroke={colors.cardBorder} strokeWidth="1" fill="none" strokeDasharray="3 7" opacity="0.6" />
+
+            {/* Tick marks */}
+            {Array.from({ length: 72 }, (_, i) => {
+              const deg     = i * 5;
+              const a       = (deg * Math.PI) / 180;
+              const isMaj   = deg % 90 === 0;
+              const isMed   = deg % 45 === 0;
+              const isSm    = deg % 10 === 0;
+              const r1 = isMaj ? R - 28 : isMed ? R - 20 : isSm ? R - 14 : R - 10;
+              const r2 = R - 8;
               return (
                 <Line
                   key={i}
-                  x1={150 + r1 * Math.sin(a)}   y1={150 - r1 * Math.cos(a)}
-                  x2={150 + 138 * Math.sin(a)}  y2={150 - 138 * Math.cos(a)}
-                  stroke={isMajor ? colors.gold : colors.cardBorder}
-                  strokeWidth={isMajor ? 2.5 : 1}
+                  x1={cx + r1 * Math.sin(a)} y1={cy - r1 * Math.cos(a)}
+                  x2={cx + r2 * Math.sin(a)} y2={cy - r2 * Math.cos(a)}
+                  stroke={isMaj ? colors.gold : isMed ? colors.textSecondary : colors.cardBorder}
+                  strokeWidth={isMaj ? 2.5 : isMed ? 1.5 : 0.8}
+                  opacity={isMaj ? 1 : isMed ? 0.8 : 0.5}
                 />
               );
             })}
+
+            {/* Cardinal labels */}
             {cardinals.map(({ label, angle }) => {
               const rad = (angle * Math.PI) / 180;
+              const isN = angle === 0;
+              const lr  = R - 44;
               return (
-                <SvgText
-                  key={label}
-                  x={150 + 100 * Math.sin(rad)}
-                  y={150 - 100 * Math.cos(rad) + 6}
-                  textAnchor="middle"
-                  fill={angle === 0 ? colors.red : colors.textSecondary}
-                  fontSize="16"
-                  fontWeight="bold"
-                >
-                  {label}
-                </SvgText>
+                <G key={label}>
+                  {isN && (
+                    // Red triangle above N
+                    <Path
+                      d={`M${cx + lr * Math.sin(rad)} ${cy - lr * Math.cos(rad) - 14} l6 12 l-12 0 Z`}
+                      fill={colors.red}
+                      opacity="0.85"
+                    />
+                  )}
+                  <SvgText
+                    x={cx + lr * Math.sin(rad)}
+                    y={cy - lr * Math.cos(rad) + (isN ? 16 : 6)}
+                    textAnchor="middle"
+                    fill={isN ? colors.red : colors.textSecondary}
+                    fontSize={isN ? '17' : '14'}
+                    fontWeight="bold"
+                    opacity={isN ? '1' : '0.85'}
+                  >
+                    {label}
+                  </SvgText>
+                </G>
               );
             })}
           </Svg>
         </Animated.View>
 
-        {/* Qibla arrow (points toward Mecca) */}
+        {/* ── Qibla Needle ── */}
         <Animated.View style={[styles.layer, { transform: [{ rotate: arrowRotate }] }]}>
-          <Svg width={300} height={300} viewBox="0 0 300 300">
-            {/* Arrow head */}
+          <Svg width={320} height={320} viewBox="0 0 320 320">
+            <Defs>
+              <RadialGradient id="glowGrad" cx="50%" cy="15%" r="40%">
+                <Stop offset="0%"   stopColor={arrowColor} stopOpacity="0.35" />
+                <Stop offset="100%" stopColor={arrowColor} stopOpacity="0"    />
+              </RadialGradient>
+            </Defs>
+
+            {/* Glow behind needle tip */}
+            <Circle cx={cx} cy={cy - 85} r="32" fill="url(#glowGrad)" />
+
+            {/* Upper needle (toward Mecca) — gold/green */}
             <Path
-              d="M150 58 L172 118 L160 112 L160 210 L140 210 L140 112 L128 118 Z"
+              d={`M${cx} ${cy - 100} L${cx + 14} ${cy - 4} L${cx} ${cy + 8} L${cx - 14} ${cy - 4} Z`}
               fill={arrowColor}
-              opacity={0.95}
+              opacity="0.95"
             />
-            {/* Subtle glow ring at tip */}
-            <Circle cx="150" cy="56" r="10" fill={arrowColor} opacity={0.25} />
-            <Circle cx="150" cy="56" r="5" fill={arrowColor} />
+
+            {/* Lower needle (opposite) — muted */}
+            <Path
+              d={`M${cx} ${cy + 100} L${cx + 10} ${cy + 6} L${cx} ${cy - 6} L${cx - 10} ${cy + 6} Z`}
+              fill={arrowColor}
+              opacity="0.22"
+            />
+
+            {/* Mosque icon at tip */}
+            <SvgText
+              x={cx}
+              y={cy - 108}
+              textAnchor="middle"
+              fontSize="18"
+              fill={arrowColor}
+            >
+              🕌
+            </SvgText>
           </Svg>
         </Animated.View>
 
-        {/* Center dot */}
-        <View style={styles.centerDot} />
+        {/* Center ring */}
+        <View style={styles.centerRing}>
+          <View style={styles.centerInner} />
+        </View>
       </View>
 
-      {/* Info row */}
+      {/* Info cards */}
       <View style={styles.infoRow}>
         <View style={styles.infoBox}>
-          <Ionicons name="compass-outline" size={20} color={colors.gold} />
+          <Ionicons name="compass-outline" size={22} color={colors.gold} />
           <Text style={styles.infoLabel}>{t('qiblaCompass')}</Text>
           <Text style={styles.infoValue}>{hasPermission ? `${displayMag}°` : '--'}</Text>
         </View>
-        <View style={[styles.infoBox, styles.infoBoxCenter, isAligned && styles.alignedBox]}>
-          <MaterialCommunityIcons name="mosque" size={20} color={isAligned ? colors.green : colors.gold} />
+
+        <View style={[styles.infoBox, styles.infoBoxGold, isAligned && styles.infoBoxGreen]}>
+          <MaterialCommunityIcons name="mosque" size={22} color={isAligned ? colors.green : colors.gold} />
           <Text style={styles.infoLabel}>{t('tabQibla')}</Text>
-          <Text style={[styles.infoValue, isAligned && { color: colors.green }]}>{`${qiblaAngle.toFixed(0)}°`}</Text>
+          <Text style={[styles.infoValue, isAligned && { color: colors.green }]}>
+            {`${qiblaAngle.toFixed(0)}°`}
+          </Text>
         </View>
+
         <View style={styles.infoBox}>
-          <MaterialCommunityIcons name="map-marker-distance" size={20} color={colors.gold} />
+          <MaterialCommunityIcons name="map-marker-distance" size={22} color={colors.gold} />
           <Text style={styles.infoLabel}>{t('qiblaStatus')}</Text>
           <Text style={[styles.infoValue, { fontSize: FONT_SIZE.xs, color: isAligned ? colors.green : colors.textSecondary }]}>
             {isAligned
               ? t('qiblaAligned')
-              : hasPermission
-                ? `${Math.abs(((((qiblaAngle - displayMag) % 360) + 360) % 360 + 180) % 360 - 180).toFixed(0)}° ${t('qiblaDiff')}`
-                : '--'}
+              : hasPermission ? `${diffDeg.toFixed(0)}° ${t('qiblaDiff')}` : '--'}
           </Text>
         </View>
       </View>
@@ -220,9 +275,9 @@ export default function QiblaScreen() {
       )}
 
       {!hasPermission && (
-        <View style={styles.permissionBanner}>
+        <View style={styles.permBanner}>
           <Ionicons name="warning-outline" size={18} color={colors.gold} />
-          <Text style={styles.permissionText}>{t('qiblaSensorNote')}</Text>
+          <Text style={styles.permText}>{t('qiblaSensorNote')}</Text>
         </View>
       )}
     </SafeAreaView>
