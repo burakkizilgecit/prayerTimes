@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   StatusBar, ActivityIndicator, ImageBackground, Dimensions,
-  Modal, FlatList, Share, Switch,
+  Modal, FlatList, Share, Switch, Alert, BackHandler,
 } from 'react-native';
 import ViewShot from 'react-native-view-shot';
 import * as MediaLibrary from 'expo-media-library';
@@ -74,7 +74,7 @@ const makeStyles = (colors: any, fs: (n: number) => number) => StyleSheet.create
   nextPrayerName:  { color: '#FFFFFF', fontSize: fs(FONT_SIZE.lg), fontWeight: '700', marginBottom: SPACING.sm },
   nextPrayerLeft:  { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
   nextPrayerIconBox: { width: 38, height: 38, borderRadius: 19, backgroundColor: 'rgba(212,168,75,0.15)', alignItems: 'center', justifyContent: 'center' },
-  countdownBox:  { alignItems: 'flex-end', marginTop: 4 },
+  countdownBox:  { alignItems: 'flex-start', marginTop: 4 },
   countdownText: { color: colors.gold, fontSize: fs(FONT_SIZE.xxxl), fontWeight: '800', letterSpacing: 4, fontVariant: ['tabular-nums'], includeFontPadding: false },
   countdownLabel: { color: 'rgba(255,255,255,0.6)', fontSize: fs(FONT_SIZE.xs), letterSpacing: 1, marginTop: 2 },
   section:      { paddingHorizontal: SPACING.md, marginTop: SPACING.lg },
@@ -170,7 +170,16 @@ export default function HomeScreen() {
 
   const handleLangChange = (lang: Language) => {
     updateSettings({ language: lang });
-    applyRTL(lang);
+    const needsRestart = applyRTL(lang);
+    if (needsRestart) {
+      Alert.alert(
+        lang === 'ar' ? 'إعادة التشغيل مطلوبة' : 'Yeniden Başlatma',
+        lang === 'ar'
+          ? 'أغلق التطبيق وأعد فتحه لتفعيل التخطيط الصحيح.'
+          : 'Dil değişikliğinin uygulanması için uygulamayı kapatıp yeniden açın.',
+        [{ text: lang === 'ar' ? 'حسناً' : 'Tamam', onPress: () => BackHandler.exitApp() }]
+      );
+    }
   };
   const shareCardRef = useRef<ViewShot>(null);
   const unreadCount = getUnreadCount();

@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  StatusBar, Animated, Modal,
+  StatusBar, Animated, Modal, Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
@@ -12,34 +12,35 @@ import { SPACING, RADIUS, FONT_SIZE } from '../../constants/theme';
 import { useTheme } from '../../context/ThemeContext';
 import { useDhikrStore } from '../../store/useDhikrStore';
 
+const { width: SCREEN_W } = Dimensions.get('window');
+const CARD_GAP = SPACING.sm;
+const CARD_W = (SCREEN_W - SPACING.md * 2 - CARD_GAP) / 2;
+const RING_R = 44;
+const RING_CIRCUM = 2 * Math.PI * RING_R;
+
 const makeStyles = (colors: any, fs: (n: number) => number) => StyleSheet.create({
-  container:  { flex: 1, backgroundColor: colors.background },
-  header:     { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm + 2 },
-  headerTitle:{ color: colors.textPrimary, fontSize: fs(FONT_SIZE.xxl), fontWeight: '800' },
-  historyBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderRadius: RADIUS.md, borderColor: colors.cardBorderActive, borderWidth: 1 },
-  tabs:           { flexDirection: 'row', marginHorizontal: SPACING.md, backgroundColor: colors.surface, borderRadius: RADIUS.full, padding: 4, borderColor: colors.cardBorderActive, borderWidth: 1, marginBottom: SPACING.md },
-  tab:            { flex: 1, paddingVertical: SPACING.sm, alignItems: 'center', borderRadius: RADIUS.full },
-  tabActive:      { backgroundColor: colors.gold },
-  tabLabel:       { color: colors.textMuted, fontSize: fs(FONT_SIZE.sm), fontWeight: '600' },
-  tabLabelActive: { color: colors.background, fontWeight: '800' },
-  counterArea: { alignItems: 'center', paddingVertical: SPACING.sm, position: 'relative' },
-  glowRing: { position: 'absolute', width: 230, height: 230, borderRadius: 115, backgroundColor: colors.goldGlow, top: '50%', alignSelf: 'center', marginTop: -115 },
-  svgContainer:  { width: 220, height: 220, alignItems: 'center', justifyContent: 'center' },
-  counterCenter: { position: 'absolute', alignItems: 'center' },
-  counterValue:  { color: colors.textPrimary, fontSize: 52, fontWeight: '800', lineHeight: 58, fontVariant: ['tabular-nums'] },
-  counterLabel:  { color: colors.gold, fontSize: 11, fontWeight: '700', letterSpacing: 2, marginTop: 2 },
-  counterTarget: { color: colors.textMuted, fontSize: fs(FONT_SIZE.sm), marginTop: 4, fontVariant: ['tabular-nums'] },
-  tapHint:       { color: colors.textMuted, fontSize: 10, letterSpacing: 2, marginTop: SPACING.xs },
-  section:         { marginHorizontal: SPACING.md, backgroundColor: colors.cardBg, borderColor: colors.cardBorder, borderWidth: 1, borderRadius: RADIUS.xl, overflow: 'hidden', marginBottom: SPACING.md },
-  dhikrRow:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SPACING.md, paddingVertical: 14 },
-  dhikrRowBorder:  { borderBottomColor: colors.cardBorder, borderBottomWidth: 1 },
-  dhikrName:       { color: colors.textPrimary, fontSize: fs(FONT_SIZE.md), fontWeight: '500' },
-  dhikrControls:   { flexDirection: 'row', alignItems: 'center', gap: SPACING.sm },
-  counterBadge:    { minWidth: 50, alignItems: 'flex-end' },
-  dhikrCount:      { color: colors.gold, fontSize: fs(FONT_SIZE.xl), fontWeight: '800', fontVariant: ['tabular-nums'] },
-  plusBtn:         { width: 36, height: 36, borderRadius: 18, backgroundColor: colors.gold, alignItems: 'center', justifyContent: 'center' },
-  resetBtn:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: SPACING.sm, backgroundColor: colors.surface, borderColor: colors.cardBorderActive, borderWidth: 1, borderRadius: RADIUS.xl, paddingVertical: SPACING.sm + 4, marginHorizontal: SPACING.md, marginBottom: SPACING.md },
-  resetText: { color: colors.textSecondary, fontSize: fs(FONT_SIZE.sm), fontWeight: '600' },
+  container:     { flex: 1, backgroundColor: colors.background },
+  header:        { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SPACING.md, paddingVertical: SPACING.sm + 2 },
+  headerTitle:   { color: colors.textPrimary, fontSize: fs(FONT_SIZE.xxl), fontWeight: '800' },
+  historyBtn:    { width: 40, height: 40, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderRadius: RADIUS.md, borderColor: colors.cardBorderActive, borderWidth: 1 },
+  tabs:          { flexDirection: 'row', marginHorizontal: SPACING.md, backgroundColor: colors.surface, borderRadius: RADIUS.full, padding: 4, borderColor: colors.cardBorderActive, borderWidth: 1, marginBottom: SPACING.md },
+  tab:           { flex: 1, paddingVertical: SPACING.sm, alignItems: 'center', borderRadius: RADIUS.full },
+  tabActive:     { backgroundColor: colors.gold },
+  tabLabel:      { color: colors.textMuted, fontSize: fs(FONT_SIZE.sm), fontWeight: '600' },
+  tabLabelActive:{ color: colors.background, fontWeight: '800' },
+
+  grid:          { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: SPACING.md, gap: CARD_GAP, marginBottom: SPACING.md },
+  card:          { width: CARD_W, backgroundColor: colors.cardBg, borderColor: colors.cardBorder, borderWidth: 1, borderRadius: RADIUS.xl, alignItems: 'center', paddingVertical: SPACING.md, paddingHorizontal: SPACING.sm },
+  cardDone:      { borderColor: colors.gold },
+  cardName:      { color: colors.textMuted, fontSize: fs(9), fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginBottom: SPACING.sm, textAlign: 'center' },
+  ringWrap:      { width: 108, height: 108, alignItems: 'center', justifyContent: 'center' },
+  ringCenter:    { position: 'absolute', alignItems: 'center' },
+  countValue:    { color: colors.textPrimary, fontSize: fs(30), fontWeight: '800', lineHeight: 34, fontVariant: ['tabular-nums'] },
+  countTarget:   { color: colors.textMuted, fontSize: fs(11), fontVariant: ['tabular-nums'] },
+
+  resetBtn:      { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: SPACING.sm, backgroundColor: colors.surface, borderColor: colors.cardBorderActive, borderWidth: 1, borderRadius: RADIUS.xl, paddingVertical: SPACING.sm + 4, marginHorizontal: SPACING.md, marginBottom: SPACING.md },
+  resetText:     { color: colors.textSecondary, fontSize: fs(FONT_SIZE.sm), fontWeight: '600' },
+
   weekSection:   { marginHorizontal: SPACING.md, backgroundColor: colors.cardBg, borderColor: colors.cardBorder, borderWidth: 1, borderRadius: RADIUS.xl, padding: SPACING.md, marginBottom: SPACING.xl },
   weekHeader:    { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: SPACING.md },
   weekTitle:     { color: colors.textMuted, fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1.5 },
@@ -52,16 +53,17 @@ const makeStyles = (colors: any, fs: (n: number) => number) => StyleSheet.create
   weekBarDay:    { color: colors.textMuted, fontSize: fs(FONT_SIZE.xs) },
   reminderBanner:{ flexDirection: 'row', alignItems: 'center', gap: SPACING.sm, backgroundColor: colors.goldGlow, borderRadius: RADIUS.md, padding: SPACING.sm, marginTop: SPACING.sm },
   reminderText:  { color: colors.textSecondary, fontSize: fs(FONT_SIZE.sm) },
-  modalOverlay:   { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
-  modalSheet:     { backgroundColor: colors.cardBg, borderTopLeftRadius: RADIUS.xl, borderTopRightRadius: RADIUS.xl, padding: SPACING.lg, paddingBottom: SPACING.xl },
-  modalHeader:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: SPACING.lg },
-  modalTitle:     { color: colors.textPrimary, fontSize: fs(FONT_SIZE.lg), fontWeight: '700' },
-  modalClose:     { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
-  modalBars:      { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: SPACING.lg },
-  modalBarCol:    { flex: 1, alignItems: 'center', gap: 4 },
-  modalBarValue:  { color: colors.textSecondary, fontSize: fs(FONT_SIZE.xs), fontWeight: '600' },
-  modalBarTrack:  { width: 28, backgroundColor: colors.surface, borderRadius: 8, justifyContent: 'flex-end', overflow: 'hidden' },
-  modalTotalRow:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(200,168,83,0.1)', borderRadius: RADIUS.md, padding: SPACING.md },
+
+  modalOverlay:  { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'flex-end' },
+  modalSheet:    { backgroundColor: colors.cardBg, borderTopLeftRadius: RADIUS.xl, borderTopRightRadius: RADIUS.xl, padding: SPACING.lg, paddingBottom: SPACING.xl },
+  modalHeader:   { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: SPACING.lg },
+  modalTitle:    { color: colors.textPrimary, fontSize: fs(FONT_SIZE.lg), fontWeight: '700' },
+  modalClose:    { width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
+  modalBars:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: SPACING.lg },
+  modalBarCol:   { flex: 1, alignItems: 'center', gap: 4 },
+  modalBarValue: { color: colors.textSecondary, fontSize: fs(FONT_SIZE.xs), fontWeight: '600' },
+  modalBarTrack: { width: 28, backgroundColor: colors.surface, borderRadius: 8, justifyContent: 'flex-end', overflow: 'hidden' },
+  modalTotalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(200,168,83,0.1)', borderRadius: RADIUS.md, padding: SPACING.md },
   modalTotalLabel:{ color: colors.textSecondary, fontSize: fs(FONT_SIZE.sm), fontWeight: '600' },
   modalTotalValue:{ color: colors.gold, fontSize: fs(FONT_SIZE.lg), fontWeight: '800' },
 });
@@ -73,41 +75,70 @@ const CATEGORIES = [
   { id: 'diger', label: 'Diğer' },
 ] as const;
 
-const R = 80;
-const CIRCUMFERENCE = 2 * Math.PI * R;
+function DhikrCard({ item, onPress, colors, fs }: {
+  item: { id: string; name: string; count: number; target: number };
+  onPress: () => void;
+  colors: any;
+  fs: (n: number) => number;
+}) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const styles = React.useMemo(() => makeStyles(colors, fs), [colors, fs]);
+  const progress = Math.min(item.count / item.target, 1);
+  const offset = RING_CIRCUM * (1 - progress);
+  const done = item.count >= item.target;
+
+  const handlePress = () => {
+    onPress();
+    Animated.sequence([
+      Animated.spring(scaleAnim, { toValue: 0.92, useNativeDriver: true, tension: 300, friction: 8 }),
+      Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, tension: 200, friction: 6 }),
+    ]).start();
+  };
+
+  return (
+    <TouchableOpacity activeOpacity={0.8} onPress={handlePress}>
+      <Animated.View style={[styles.card, done && styles.cardDone, { transform: [{ scale: scaleAnim }] }]}>
+        <Text style={styles.cardName} numberOfLines={2}>{item.name}</Text>
+        <View style={styles.ringWrap}>
+          <Svg width={108} height={108} viewBox="0 0 108 108">
+            <Circle cx="54" cy="54" r={RING_R} stroke={colors.cardBorder} strokeWidth={8} fill="none" />
+            <Circle
+              cx="54" cy="54" r={RING_R}
+              stroke={done ? colors.green : colors.gold}
+              strokeWidth={8}
+              fill="none"
+              strokeDasharray={RING_CIRCUM}
+              strokeDashoffset={offset}
+              strokeLinecap="round"
+              transform="rotate(-90 54 54)"
+            />
+          </Svg>
+          <View style={styles.ringCenter}>
+            <Text style={[styles.countValue, done && { color: colors.green }]}>{item.count}</Text>
+            <Text style={styles.countTarget}>/ {item.target}</Text>
+          </View>
+        </View>
+      </Animated.View>
+    </TouchableOpacity>
+  );
+}
 
 export default function DhikrScreen() {
   const { colors, fs } = useTheme();
   const { t } = useTranslation();
   const { items, activeCategory, increment, reset, setCategory, getTotalToday, loadData, getWeeklyHistory } = useDhikrStore();
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  const glowAnim  = useRef(new Animated.Value(0)).current;
   const [showHistory, setShowHistory] = useState(false);
   const styles = React.useMemo(() => makeStyles(colors, fs), [colors, fs]);
 
   useEffect(() => { loadData(); }, []);
 
   const filteredItems = items.filter(i => i.category === activeCategory);
-  const mainItem = filteredItems[0];
   const total = getTotalToday();
   const weekHistory = getWeeklyHistory();
-  const mainProgress = mainItem ? Math.min(mainItem.count / mainItem.target, 1) : 0;
-  const strokeDashoffset = CIRCUMFERENCE * (1 - mainProgress);
 
   const handleIncrement = async (id: string) => {
     increment(id);
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    // Pulse animation on tap
-    Animated.sequence([
-      Animated.parallel([
-        Animated.spring(pulseAnim, { toValue: 0.93, useNativeDriver: true, tension: 300, friction: 8 }),
-        Animated.timing(glowAnim, { toValue: 1, duration: 80, useNativeDriver: true }),
-      ]),
-      Animated.parallel([
-        Animated.spring(pulseAnim, { toValue: 1, useNativeDriver: true, tension: 200, friction: 6 }),
-        Animated.timing(glowAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
-      ]),
-    ]).start();
   };
 
   return (
@@ -137,65 +168,24 @@ export default function DhikrScreen() {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Main Counter */}
-        {mainItem && (
-          <TouchableOpacity onPress={() => handleIncrement(mainItem.id)} activeOpacity={1}>
-            <Animated.View style={[styles.counterArea, { transform: [{ scale: pulseAnim }] }]}>
-              {/* Glow ring */}
-              <Animated.View style={[styles.glowRing, { opacity: glowAnim }]} />
-              <View style={styles.svgContainer}>
-                <Svg width={220} height={220} viewBox="0 0 220 220">
-                  {/* Track */}
-                  <Circle cx="110" cy="110" r={R} stroke={colors.cardBorder} strokeWidth={12} fill="none" />
-                  {/* Progress */}
-                  <Circle
-                    cx="110" cy="110" r={R}
-                    stroke={colors.gold}
-                    strokeWidth={12}
-                    fill="none"
-                    strokeDasharray={CIRCUMFERENCE}
-                    strokeDashoffset={strokeDashoffset}
-                    strokeLinecap="round"
-                    transform="rotate(-90 110 110)"
-                  />
-                </Svg>
-                <View style={styles.counterCenter}>
-                  <Text style={styles.counterValue}>{mainItem.count}</Text>
-                  <Text style={styles.counterLabel}>{mainItem.name.toUpperCase()}</Text>
-                  <Text style={styles.counterTarget}>/ {mainItem.target}</Text>
-                </View>
-              </View>
-              <Text style={styles.tapHint}>• DOKUNARAK ZİKİR YAP •</Text>
-            </Animated.View>
-          </TouchableOpacity>
-        )}
-
-        {/* Dhikr List */}
-        <View style={styles.section}>
-          {filteredItems.map((item, i) => (
-            <View key={item.id} style={[styles.dhikrRow, i < filteredItems.length - 1 && styles.dhikrRowBorder]}>
-              <Text style={styles.dhikrName}>{item.name}</Text>
-              <View style={styles.dhikrControls}>
-                <View style={styles.counterBadge}>
-                  <Text style={[styles.dhikrCount, item.count >= item.target && { color: colors.green }]}>
-                    {item.count}
-                  </Text>
-                </View>
-                <TouchableOpacity onPress={() => handleIncrement(item.id)} style={styles.plusBtn}>
-                  <Ionicons name="add" size={20} color={colors.background} />
-                </TouchableOpacity>
-              </View>
-            </View>
+        {/* Counter Grid */}
+        <View style={styles.grid}>
+          {filteredItems.map(item => (
+            <DhikrCard
+              key={item.id}
+              item={item}
+              onPress={() => handleIncrement(item.id)}
+              colors={colors}
+              fs={fs}
+            />
           ))}
         </View>
 
         {/* Reset Button */}
-        <View style={{ paddingHorizontal: SPACING.md }}>
-          <TouchableOpacity style={styles.resetBtn} onPress={reset}>
-            <Ionicons name="refresh" size={18} color={colors.textSecondary} />
-            <Text style={styles.resetText}>Sıfırla</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity style={styles.resetBtn} onPress={reset}>
+          <Ionicons name="refresh" size={18} color={colors.textSecondary} />
+          <Text style={styles.resetText}>Sıfırla</Text>
+        </TouchableOpacity>
 
         {/* Weekly Record */}
         <View style={styles.weekSection}>
@@ -262,4 +252,3 @@ export default function DhikrScreen() {
     </SafeAreaView>
   );
 }
-

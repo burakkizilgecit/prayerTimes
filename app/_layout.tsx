@@ -1,7 +1,8 @@
 import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef } from 'react';
-import { Platform } from 'react-native';
+import { Alert, BackHandler, I18nManager, Platform } from 'react-native';
+import { useSettingsStore as _useSettingsStore } from '../store/useSettingsStore';
 import { ThemeProvider } from '../context/ThemeContext';
 import { useTheme } from '../context/ThemeContext';
 import { requestWidgetUpdate } from 'react-native-android-widget';
@@ -34,13 +35,32 @@ function RootLayoutInner() {
   const notifListener     = useRef<Notifications.EventSubscription | null>(null);
 
   useEffect(() => {
-    // Load persisted data
-    loadCompletion();
-    loadDhikr();
-    loadGoals();
-    loadSettings();
-    loadNotifications();
-    loadTutorial();
+    const init = async () => {
+      loadCompletion();
+      loadDhikr();
+      loadGoals();
+      await loadSettings();
+
+      // Correct RTL state if it doesn't match the stored language
+      const lang = _useSettingsStore.getState().settings.language ?? 'tr';
+      const shouldBeRTL = lang === 'ar';
+      if (I18nManager.isRTL !== shouldBeRTL) {
+        I18nManager.allowRTL(shouldBeRTL);
+        I18nManager.forceRTL(shouldBeRTL);
+        Alert.alert(
+          lang === 'ar' ? 'إعادة التشغيل' : 'Güncelleme',
+          lang === 'ar'
+            ? 'أغلق التطبيق وأعد فتحه لتفعيل التخطيط الصحيح.'
+            : 'Uygulama düzeni düzeltildi. Uygulamayı yeniden başlatın.',
+          [{ text: lang === 'ar' ? 'حسناً' : 'Tamam', onPress: () => BackHandler.exitApp() }]
+        );
+        return;
+      }
+
+      loadNotifications();
+      loadTutorial();
+    };
+    init();
 
     // Set up notification infrastructure
     setupNotificationHandler();
