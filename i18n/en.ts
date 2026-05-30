@@ -64,6 +64,8 @@ export const en: Record<TKey, string> = {
   settingsNotificationsDesc: 'Configure reminders for important prayers.',
   settingsSound: 'Notification Sound', settingsSoundDesc: 'Choose the sound for prayer notifications.',
   settingsLanguage: 'App Language', settingsLanguageDesc: 'Change the interface language',
+  settingsTheme: 'Theme', settingsThemeDark: '🌙 Night', settingsThemeLight: '☀️ Day',
+  settingsAppSettings: 'App Settings',
   settingsOther: 'Other Settings',
   settingsSilentHours: 'Silent Hours', settingsSilentHoursDesc: 'No notifications during these hours',
   settingsVibration: 'Vibration', settingsVibrationOn: 'on', settingsVibrationOff: 'off',

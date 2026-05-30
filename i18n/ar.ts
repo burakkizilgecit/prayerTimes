@@ -64,6 +64,8 @@ export const ar: Record<TKey, string> = {
   settingsNotificationsDesc: 'تكوين التذكيرات للصلوات.',
   settingsSound: 'صوت الإشعار', settingsSoundDesc: 'اختر صوت إشعارات وقت الصلاة.',
   settingsLanguage: 'لغة التطبيق', settingsLanguageDesc: 'تغيير لغة الواجهة',
+  settingsTheme: 'المظهر', settingsThemeDark: '🌙 ليلي', settingsThemeLight: '☀️ نهاري',
+  settingsAppSettings: 'إعدادات التطبيق',
   settingsOther: 'إعدادات أخرى',
   settingsSilentHours: 'ساعات الصمت', settingsSilentHoursDesc: 'لا إشعارات خلال هذه الساعات',
   settingsVibration: 'الاهتزاز', settingsVibrationOn: 'مفعّل', settingsVibrationOff: 'معطّل',

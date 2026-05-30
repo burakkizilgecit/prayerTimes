@@ -75,6 +75,8 @@ export const tr = {
   settingsNotificationsDesc: 'Önemli hatırlatmalar için bildirimleri ayarlayabilirsiniz.',
   settingsSound: 'Bildirim Sesi', settingsSoundDesc: 'Namaz vakti bildirimlerinde çalacak ses.',
   settingsLanguage: 'Uygulama Dili', settingsLanguageDesc: 'Arayüz dilini değiştirin',
+  settingsTheme: 'Tema', settingsThemeDark: '🌙 Gece', settingsThemeLight: '☀️ Gündüz',
+  settingsAppSettings: 'Uygulama Ayarları',
   settingsOther: 'Diğer Ayarlar',
   settingsSilentHours: 'Sessiz Saatler', settingsSilentHoursDesc: 'Bu saatler arasında bildirim gelmez',
   settingsVibration: 'Titreşim', settingsVibrationOn: 'açık', settingsVibrationOff: 'kapalı',

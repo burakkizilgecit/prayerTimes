@@ -308,18 +308,20 @@ export default function HomeScreen() {
         <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={() => setShowNotifSettings(false)}>
           <View style={styles.notifSettingsSheet} onStartShouldSetResponder={() => true}>
             <View style={styles.sheetHandle} />
+
+            {/* Uygulama Ayarları */}
             <View style={styles.notifSettingsHeader}>
-              <Ionicons name="notifications-outline" size={20} color={colors.gold} />
-              <Text style={styles.notifSettingsTitle}>{t('settingsNotifications')}</Text>
+              <Ionicons name="settings-outline" size={20} color={colors.gold} />
+              <Text style={styles.notifSettingsTitle}>{t('settingsAppSettings' as any)}</Text>
             </View>
 
-            {/* Theme toggle */}
+            {/* Tema toggle */}
             <View style={styles.themeRow}>
               <Ionicons name="contrast-outline" size={16} color={colors.textMuted} />
-              <Text style={styles.themeLabel}>{t('settingsTheme' as any) ?? 'Tema'}:</Text>
+              <Text style={styles.themeLabel}>{t('settingsTheme' as any)}:</Text>
               {(['dark', 'light'] as const).map((t_) => {
                 const active = (settings.theme ?? 'dark') === t_;
-                const label  = t_ === 'dark' ? '🌙 Gece' : '☀️ Gündüz';
+                const label  = t_ === 'dark' ? t('settingsThemeDark' as any) : t('settingsThemeLight' as any);
                 return (
                   <TouchableOpacity
                     key={t_}
@@ -332,7 +334,7 @@ export default function HomeScreen() {
               })}
             </View>
 
-            {/* Language quick-switcher */}
+            {/* Dil seçici */}
             <View style={styles.notifLangRow}>
               <Ionicons name="language-outline" size={16} color={colors.textMuted} />
               <Text style={styles.notifLangTitle}>{t('settingsLanguage')}:</Text>
@@ -349,6 +351,12 @@ export default function HomeScreen() {
                   </TouchableOpacity>
                 );
               })}
+            </View>
+
+            {/* Bildirim Ayarları başlığı */}
+            <View style={[styles.notifSettingsHeader, { marginTop: SPACING.sm }]}>
+              <Ionicons name="notifications-outline" size={20} color={colors.gold} />
+              <Text style={styles.notifSettingsTitle}>{t('settingsNotifications')}</Text>
             </View>
 
             {([
