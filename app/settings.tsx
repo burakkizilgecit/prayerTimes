@@ -2,6 +2,7 @@ import React, { useRef, useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   Switch, StatusBar, Modal, Linking, ActivityIndicator, Platform,
+  BackHandler,
 } from 'react-native';
 import { Audio } from 'expo-av';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,7 +12,7 @@ import * as Haptics from 'expo-haptics';
 import { Alert } from 'react-native';
 import { useTutorialStore } from '../store/useTutorialStore';
 import type { NotificationSound } from '../store/useSettingsStore';
-import { useTranslation, applyRTL, type Language } from '../i18n';
+import { useTranslation, type Language } from '../i18n';
 import { pickSystemRingtone, pickAudioFile } from '../services/soundPickerService';
 import { setupCustomNotificationChannel } from '../services/notificationService';
 import { scheduleAllNotifications } from '../services/notificationService';
@@ -326,13 +327,14 @@ export default function SettingsScreen() {
 
   const handleLanguageChange = (lang: Language) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const currentLang = settings.language ?? 'tr';
     updateSettings({ language: lang });
-    const needsRestart = applyRTL(lang);
-    if (needsRestart) {
+    const isRTLChange = (lang === 'ar') !== (currentLang === 'ar');
+    if (isRTLChange) {
       Alert.alert(
         lang === 'ar' ? 'إعادة التشغيل مطلوبة' : 'Yeniden Başlatma',
         lang === 'ar' ? 'أغلق التطبيق وأعد فتحه لتفعيل اللغة العربية.' : 'Dil değişikliğinin tam olarak uygulanması için uygulamayı kapatıp yeniden açın.',
-        [{ text: lang === 'ar' ? 'حسناً' : 'Tamam' }]
+        [{ text: lang === 'ar' ? 'حسناً' : 'Tamam', onPress: () => BackHandler.exitApp() }]
       );
     }
   };

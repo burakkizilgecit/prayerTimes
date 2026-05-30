@@ -17,7 +17,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { usePrayerStore } from '../../store/usePrayerStore';
 import { useNotificationStore } from '../../store/useNotificationStore';
 import { useSettingsStore } from '../../store/useSettingsStore';
-import { useTranslation, applyRTL, type Language } from '../../i18n';
+import { useTranslation, type Language } from '../../i18n';
 import { formatPrayerTime, getNextPrayer, getCountdown } from '../../services/prayerService';
 import { formatGregorianDate, formatHijriDate, getDayName } from '../../services/hijriService';
 import { getDailyHadith } from '../../data/hadiths';
@@ -169,13 +169,14 @@ export default function HomeScreen() {
   const styles = React.useMemo(() => makeStyles(colors, fs), [colors, fs]);
 
   const handleLangChange = (lang: Language) => {
+    const currentLang = settings.language ?? 'tr';
     updateSettings({ language: lang });
-    const needsRestart = applyRTL(lang);
-    if (needsRestart) {
+    const isRTLChange = (lang === 'ar') !== (currentLang === 'ar');
+    if (isRTLChange) {
       Alert.alert(
         lang === 'ar' ? 'إعادة التشغيل مطلوبة' : 'Yeniden Başlatma',
         lang === 'ar'
-          ? 'أغلق التطبيق وأعد فتحه لتفعيل التخطيط الصحيح.'
+          ? 'أغلق التطبيق وأعد فتحه لتفعيل اللغة العربية.'
           : 'Dil değişikliğinin uygulanması için uygulamayı kapatıp yeniden açın.',
         [{ text: lang === 'ar' ? 'حسناً' : 'Tamam', onPress: () => BackHandler.exitApp() }]
       );
