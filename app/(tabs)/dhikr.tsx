@@ -68,12 +68,8 @@ const makeStyles = (colors: any, fs: (n: number) => number) => StyleSheet.create
   modalTotalValue:{ color: colors.gold, fontSize: fs(FONT_SIZE.lg), fontWeight: '800' },
 });
 
-const CATEGORIES = [
-  { id: 'tespih', label: 'Tespih' },
-  { id: 'salavat', label: 'Salavat' },
-  { id: 'istigfar', label: 'İstiğfar' },
-  { id: 'diger', label: 'Diğer' },
-] as const;
+const CATEGORY_IDS = ['tespih', 'salavat', 'istigfar', 'diger'] as const;
+type CategoryId = typeof CATEGORY_IDS[number];
 
 function DhikrCard({ item, onPress, colors, fs }: {
   item: { id: string; name: string; count: number; target: number };
@@ -123,6 +119,11 @@ function DhikrCard({ item, onPress, colors, fs }: {
   );
 }
 
+const CAT_KEY_MAP: Record<CategoryId, string> = {
+  tespih: 'dhikrCatTespih', salavat: 'dhikrCatSalavat',
+  istigfar: 'dhikrCatIstigfar', diger: 'dhikrCatDiger',
+};
+
 export default function DhikrScreen() {
   const { colors, fs } = useTheme();
   const { t } = useTranslation();
@@ -146,7 +147,7 @@ export default function DhikrScreen() {
       <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Zikirmatik</Text>
+        <Text style={styles.headerTitle}>{t('dhikrTitle')}</Text>
         <TouchableOpacity style={styles.historyBtn} onPress={() => setShowHistory(true)}>
           <MaterialCommunityIcons name="chart-bar" size={22} color={colors.gold} />
         </TouchableOpacity>
@@ -154,14 +155,14 @@ export default function DhikrScreen() {
 
       {/* Category Tabs */}
       <View style={styles.tabs}>
-        {CATEGORIES.map(cat => (
+        {CATEGORY_IDS.map(id => (
           <TouchableOpacity
-            key={cat.id}
-            style={[styles.tab, activeCategory === cat.id && styles.tabActive]}
-            onPress={() => setCategory(cat.id)}
+            key={id}
+            style={[styles.tab, activeCategory === id && styles.tabActive]}
+            onPress={() => setCategory(id)}
           >
-            <Text style={[styles.tabLabel, activeCategory === cat.id && styles.tabLabelActive]}>
-              {cat.label}
+            <Text style={[styles.tabLabel, activeCategory === id && styles.tabLabelActive]}>
+              {t(CAT_KEY_MAP[id] as any)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -184,14 +185,14 @@ export default function DhikrScreen() {
         {/* Reset Button */}
         <TouchableOpacity style={styles.resetBtn} onPress={reset}>
           <Ionicons name="refresh" size={18} color={colors.textSecondary} />
-          <Text style={styles.resetText}>Sıfırla</Text>
+          <Text style={styles.resetText}>{t('dhikrReset')}</Text>
         </TouchableOpacity>
 
         {/* Weekly Record */}
         <View style={styles.weekSection}>
           <View style={styles.weekHeader}>
-            <Text style={styles.weekTitle}>Haftalık Kayıt</Text>
-            <Text style={styles.weekTotal}>Toplam: {total}</Text>
+            <Text style={styles.weekTitle}>{t('dhikrWeekly')}</Text>
+            <Text style={styles.weekTotal}>{t('dhikrTotal')}: {total}</Text>
           </View>
           <View style={styles.weekBars}>
             {weekHistory.map((w, i) => {
@@ -211,7 +212,7 @@ export default function DhikrScreen() {
           {total === 0 && (
             <View style={styles.reminderBanner}>
               <Ionicons name="notifications-outline" size={18} color={colors.gold} />
-              <Text style={styles.reminderText}>Bugün zikir yapılmadı.</Text>
+              <Text style={styles.reminderText}>{t('dhikrNoActivity')}</Text>
             </View>
           )}
         </View>
@@ -222,7 +223,7 @@ export default function DhikrScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalSheet}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Haftalık Zikir Geçmişi</Text>
+              <Text style={styles.modalTitle}>{t('dhikrHistory')}</Text>
               <TouchableOpacity onPress={() => setShowHistory(false)} style={styles.modalClose}>
                 <Ionicons name="close" size={20} color={colors.textMuted} />
               </TouchableOpacity>
@@ -243,7 +244,7 @@ export default function DhikrScreen() {
               })}
             </View>
             <View style={styles.modalTotalRow}>
-              <Text style={styles.modalTotalLabel}>Haftalık Toplam</Text>
+              <Text style={styles.modalTotalLabel}>{t('dhikrWeeklyTotal')}</Text>
               <Text style={styles.modalTotalValue}>{weekHistory.reduce((s, w) => s + w.total, 0)}</Text>
             </View>
           </View>

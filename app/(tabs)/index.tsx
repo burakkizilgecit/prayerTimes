@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
   StatusBar, ActivityIndicator, ImageBackground, Dimensions,
-  Modal, FlatList, Share, Switch, Alert, BackHandler,
+  Modal, FlatList, Share, Switch,
 } from 'react-native';
 import ViewShot from 'react-native-view-shot';
 import * as MediaLibrary from 'expo-media-library';
@@ -169,18 +169,7 @@ export default function HomeScreen() {
   const styles = React.useMemo(() => makeStyles(colors, fs), [colors, fs]);
 
   const handleLangChange = (lang: Language) => {
-    const currentLang = settings.language ?? 'tr';
     updateSettings({ language: lang });
-    const isRTLChange = (lang === 'ar') !== (currentLang === 'ar');
-    if (isRTLChange) {
-      Alert.alert(
-        lang === 'ar' ? 'إعادة التشغيل مطلوبة' : 'Yeniden Başlatma',
-        lang === 'ar'
-          ? 'أغلق التطبيق وأعد فتحه لتفعيل اللغة العربية.'
-          : 'Dil değişikliğinin uygulanması için uygulamayı kapatıp yeniden açın.',
-        [{ text: lang === 'ar' ? 'حسناً' : 'Tamam', onPress: () => BackHandler.exitApp() }]
-      );
-    }
   };
   const shareCardRef = useRef<ViewShot>(null);
   const unreadCount = getUnreadCount();

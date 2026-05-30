@@ -52,6 +52,7 @@ export const tr = {
   dhikrTotal: 'Toplam', dhikrReset: 'Sıfırla',
   dhikrTap: '• DOKUNARAK ZİKİR YAP •', dhikrNoActivity: 'Bugün zikir yapılmadı.',
   dhikrHistory: 'Haftalık Zikir Geçmişi', dhikrWeeklyTotal: 'Haftalık Toplam',
+  dhikrCatTespih: 'Tespih', dhikrCatSalavat: 'Salavat', dhikrCatIstigfar: 'İstiğfar', dhikrCatDiger: 'Diğer',
   // Mosques
   mosquesTitle: 'En Yakın Cami', mosquesSubtitle: 'Konumunuza en yakın camileri görüntüleyin',
   mosquesSearching: 'Yakındaki camiler aranıyor...', mosquesNotFound: 'Yakında cami bulunamadı.',
@@ -63,6 +64,9 @@ export const tr = {
   mosquesMeters: 'metre', mosquesApply: 'Uygula',
   mosquesHidden: '{count} cami filtre dışında · Mesafeyi artır',
   mosquesCount: '{count} cami', mosquesWalkMin: 'dk',
+  mosquesLocationHint: 'Doğruluğu artırmak için konum izninizi açabilirsiniz.',
+  mosquesIncreaseRange: 'Mesafeyi Artır',
+  mosquesActiveFilter: 'Seçili filtre: {dist} ve daha yakın',
   // Quran
   quranTitle: "Kur'an-ı Kerim", quranSearch: 'Sure ara...',
   quranMeccan: '🕋 Mekke', quranMedinan: '🕌 Medine',

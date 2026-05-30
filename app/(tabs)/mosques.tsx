@@ -166,8 +166,8 @@ function FilterModal({
         <TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={onClose} />
         <View style={styles.filterSheet}>
           <View style={styles.sheetHandle} />
-          <Text style={styles.sheetTitle}>Mesafeye Göre Filtrele</Text>
-          <Text style={styles.sheetHint}>Maksimum mesafeyi seçin veya girin</Text>
+          <Text style={styles.sheetTitle}>{t('mosquesFilterTitle')}</Text>
+          <Text style={styles.sheetHint}>{t('mosquesFilterHint')}</Text>
 
           {/* Presets */}
           <View style={styles.presetsRow}>
@@ -186,18 +186,18 @@ function FilterModal({
 
           {/* Custom input */}
           <View style={styles.customRow}>
-            <Text style={styles.customLabel}>Özel mesafe:</Text>
+            <Text style={styles.customLabel}>{t('mosquesCustomDist')}</Text>
             <View style={styles.customInputWrap}>
               <TextInput
                 style={styles.customInput}
                 value={custom}
                 onChangeText={v => { setCustom(v.replace(/[^0-9]/g, '')); setPreset(null); }}
-                placeholder="örn. 750"
+                placeholder="750"
                 placeholderTextColor={colors.textMuted}
                 keyboardType="numeric"
                 maxLength={5}
               />
-              <Text style={styles.customUnit}>metre</Text>
+              <Text style={styles.customUnit}>{t('mosquesMeters')}</Text>
             </View>
           </View>
 
@@ -205,16 +205,12 @@ function FilterModal({
           <View style={styles.summaryRow}>
             <Ionicons name="information-circle-outline" size={15} color={colors.textMuted} />
             <Text style={styles.summaryText}>
-              Seçili filtre:{' '}
-              <Text style={{ color: colors.gold, fontWeight: '700' }}>
-                {custom.trim() !== '' ? `${custom} m` : fmtDistance(preset ?? current)}
-              </Text>{' '}
-              ve daha yakın camiler gösterilecek
+              {t('mosquesActiveFilter' as any, { dist: custom.trim() !== '' ? `${custom} m` : fmtDistance(preset ?? current) })}
             </Text>
           </View>
 
           <TouchableOpacity style={styles.applyBtn} onPress={apply}>
-            <Text style={styles.applyBtnText}>Uygula</Text>
+            <Text style={styles.applyBtnText}>{t('mosquesApply')}</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -341,8 +337,8 @@ export default function MosquesScreen() {
         <View style={styles.header}>
           <View style={{ width: 40 }} />
           <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>En Yakın Cami</Text>
-            <Text style={styles.headerSub}>Konumunuza en yakın camileri görüntüleyin</Text>
+            <Text style={styles.headerTitle}>{t('mosquesTitle')}</Text>
+            <Text style={styles.headerSub}>{t('mosquesSubtitle')}</Text>
           </View>
           <TouchableOpacity style={styles.locateBtn} onPress={loadData} disabled={fetching}>
             {fetching ? <ActivityIndicator size="small" color={colors.gold} /> : <Ionicons name="locate" size={20} color={colors.gold} />}
@@ -364,10 +360,10 @@ export default function MosquesScreen() {
         <View style={styles.sortRow}>
           <View style={styles.sortLeft}>
             <MaterialCommunityIcons name="sort" size={15} color={colors.gold} />
-            <Text style={styles.sortText}>Yakınlığa Göre</Text>
+            <Text style={styles.sortText}>{t('mosquesSortNearest')}</Text>
             {allMosques.length > 0 && (
               <View style={styles.countBadge}>
-                <Text style={styles.countText}>{filteredMosques.length} cami</Text>
+                <Text style={styles.countText}>{t('mosquesCount', { count: filteredMosques.length })}</Text>
               </View>
             )}
           </View>
@@ -382,14 +378,14 @@ export default function MosquesScreen() {
         {hiddenCount > 0 && (
           <TouchableOpacity style={styles.hiddenBanner} onPress={() => setShowFilter(true)}>
             <Ionicons name="eye-off-outline" size={14} color={colors.gold} />
-            <Text style={styles.hiddenText}>{hiddenCount} cami filtre dışında · Mesafeyi artır</Text>
+            <Text style={styles.hiddenText}>{t('mosquesHidden', { count: hiddenCount })}</Text>
           </TouchableOpacity>
         )}
 
         {loading ? (
           <View style={styles.center}>
             <ActivityIndicator color={colors.gold} size="large" />
-            <Text style={styles.statusText}>Yakındaki camiler aranıyor...</Text>
+            <Text style={styles.statusText}>{t('mosquesSearching')}</Text>
           </View>
         ) : errorMsg ? (
           <View style={styles.center}>
@@ -397,16 +393,16 @@ export default function MosquesScreen() {
             <Text style={styles.statusText}>{errorMsg}</Text>
             <TouchableOpacity style={styles.retryBtn} onPress={loadData}>
               <Ionicons name="refresh" size={16} color={colors.background} />
-              <Text style={styles.retryText}>Tekrar Dene</Text>
+              <Text style={styles.retryText}>{t('retry')}</Text>
             </TouchableOpacity>
           </View>
         ) : filteredMosques.length === 0 ? (
           <View style={styles.center}>
             <MaterialCommunityIcons name="map-search" size={40} color={colors.textMuted} />
-            <Text style={styles.statusText}>Bu mesafede cami bulunamadı.</Text>
+            <Text style={styles.statusText}>{t('mosquesNotFound')}</Text>
             <TouchableOpacity style={styles.retryBtn} onPress={() => setShowFilter(true)}>
               <MaterialCommunityIcons name="tune-vertical" size={16} color={colors.background} />
-              <Text style={styles.retryText}>Mesafeyi Artır</Text>
+              <Text style={styles.retryText}>{t('mosquesIncreaseRange' as any)}</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -443,7 +439,7 @@ export default function MosquesScreen() {
                     {isSelected && (
                       <TouchableOpacity style={styles.inlineGoBtn} onPress={() => openNavigation(item)}>
                         <Ionicons name="navigate" size={14} color={colors.background} />
-                        <Text style={styles.inlineGoBtnText}>Google Maps'te Aç</Text>
+                        <Text style={styles.inlineGoBtnText}>{t('mosquesNavigate')}</Text>
                       </TouchableOpacity>
                     )}
                   </View>
@@ -453,7 +449,7 @@ export default function MosquesScreen() {
                     </Text>
                     <View style={styles.walkRow}>
                       <Ionicons name="walk" size={12} color={colors.textMuted} />
-                      <Text style={styles.walkText}>{item.walkMin} dk</Text>
+                      <Text style={styles.walkText}>{item.walkMin} {t('mosquesWalkMin')}</Text>
                     </View>
                   </View>
                   <Ionicons
@@ -477,12 +473,12 @@ export default function MosquesScreen() {
             <Ionicons name="location" size={16} color={colors.gold} />
             <View style={{ flex: 1 }}>
               <Text style={styles.locCity}>{cityName}</Text>
-              <Text style={styles.locHint}>Doğruluğu artırmak için konum izninizi açabilirsiniz.</Text>
+              <Text style={styles.locHint}>{t('mosquesLocationHint' as any)}</Text>
             </View>
             <TouchableOpacity style={styles.updateBtn} onPress={loadData} disabled={fetching}>
               {fetching
                 ? <ActivityIndicator size="small" color={colors.background} />
-                : <><Text style={styles.updateText}>Konumu Güncelle</Text><Ionicons name="refresh" size={13} color={colors.background} /></>}
+                : <><Text style={styles.updateText}>{t('mosquesUpdate')}</Text><Ionicons name="refresh" size={13} color={colors.background} /></>}
             </TouchableOpacity>
           </View>
         </SafeAreaView>
