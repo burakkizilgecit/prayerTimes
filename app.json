@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "android": {
       "package": "com.islamicibadet.app",
-      "versionCode": 17,
+      "versionCode": 18,
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyCsJqytioV-H-SJGWSGZwQOOdZs-HQblWA"
@@ -18,8 +18,7 @@
       },
       "adaptiveIcon": {
         "backgroundColor": "#0B0F1A",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
+        "foregroundImage": "./assets/images/icon-playstore.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "permissions": [

@@ -60,7 +60,7 @@ export default function QiblaScreen() {
       if (granted) {
         Magnetometer.setUpdateInterval(100);
         subscription = Magnetometer.addListener(({ x, y }) => {
-          let angle = Math.atan2(y, x) * (180 / Math.PI);
+          let angle = Math.atan2(x, y) * (180 / Math.PI);
           angle = (angle + 360) % 360;
           setMagnetometer(angle);
         });

@@ -10,7 +10,7 @@ import { formatGregorianDate, GREGORIAN_MONTHS_TR } from '../../services/hijriSe
 import { calculatePrayerTimes } from '../../services/prayerService';
 import { useTranslation } from '../../i18n';
 
-type RekatType = 'farz' | 'sünnet' | 'vacip';
+type RekatType = 'farz' | 'sunnet' | 'vacip';
 
 interface PrayerPart {
   label: string;
@@ -30,22 +30,22 @@ const PRAYER_INFO_KEYS: Record<string, PrayerInfo> = {
   fajr: {
     nameKey: 'prayerInfoFajrName', totalRakats: 4, tipKey: 'prayerInfoFajrTip',
     parts: [
-      { label: 'prayerInfoSunnet', rakats: 2, type: 'sünnet', note: 'prayerInfoSunnetMuakkede' },
+      { label: 'prayerInfoSunnet', rakats: 2, type: 'sunnet', note: 'prayerInfoSunnetMuakkede' },
       { label: 'prayerInfoFarz', rakats: 2, type: 'farz' },
     ],
   },
   dhuhr: {
     nameKey: 'prayerInfoDhuhrName', totalRakats: 10, tipKey: 'prayerInfoDhuhrTip',
     parts: [
-      { label: 'prayerInfoFirstSunnet', rakats: 4, type: 'sünnet', note: 'prayerInfoSunnetMuakkede' },
+      { label: 'prayerInfoFirstSunnet', rakats: 4, type: 'sunnet', note: 'prayerInfoSunnetMuakkede' },
       { label: 'prayerInfoFarz', rakats: 4, type: 'farz' },
-      { label: 'prayerInfoLastSunnet', rakats: 2, type: 'sünnet', note: 'prayerInfoSunnetMuakkede' },
+      { label: 'prayerInfoLastSunnet', rakats: 2, type: 'sunnet', note: 'prayerInfoSunnetMuakkede' },
     ],
   },
   asr: {
     nameKey: 'prayerInfoAsrName', totalRakats: 8, tipKey: 'prayerInfoAsrTip',
     parts: [
-      { label: 'prayerInfoSunnet', rakats: 4, type: 'sünnet', note: 'prayerInfoSunnetGayr' },
+      { label: 'prayerInfoSunnet', rakats: 4, type: 'sunnet', note: 'prayerInfoSunnetGayr' },
       { label: 'prayerInfoFarz', rakats: 4, type: 'farz' },
     ],
   },
@@ -53,15 +53,15 @@ const PRAYER_INFO_KEYS: Record<string, PrayerInfo> = {
     nameKey: 'prayerInfoMaghribName', totalRakats: 5, tipKey: 'prayerInfoMaghribTip',
     parts: [
       { label: 'prayerInfoFarz', rakats: 3, type: 'farz' },
-      { label: 'prayerInfoSunnet', rakats: 2, type: 'sünnet', note: 'prayerInfoSunnetMuakkede' },
+      { label: 'prayerInfoSunnet', rakats: 2, type: 'sunnet', note: 'prayerInfoSunnetMuakkede' },
     ],
   },
   isha: {
     nameKey: 'prayerInfoIshaName', totalRakats: 13, tipKey: 'prayerInfoIshaTip',
     parts: [
-      { label: 'prayerInfoFirstSunnet', rakats: 4, type: 'sünnet', note: 'prayerInfoSunnetGayr' },
+      { label: 'prayerInfoFirstSunnet', rakats: 4, type: 'sunnet', note: 'prayerInfoSunnetGayr' },
       { label: 'prayerInfoFarz', rakats: 4, type: 'farz' },
-      { label: 'prayerInfoLastSunnet', rakats: 2, type: 'sünnet', note: 'prayerInfoSunnetMuakkede' },
+      { label: 'prayerInfoLastSunnet', rakats: 2, type: 'sunnet', note: 'prayerInfoSunnetMuakkede' },
       { label: 'prayerInfoVitr', rakats: 3, type: 'vacip', note: 'prayerInfoVacipNote' },
     ],
   },
